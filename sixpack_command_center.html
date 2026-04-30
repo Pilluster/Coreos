@@ -1,0 +1,2013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CORE OS — Six-Pack Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0a;--surface:#111;--card:#161616;--border:#222;--accent:#c8f135;--accent2:#ff5c3a;--accent3:#3ab4ff;--text:#f0f0f0;--muted:#666;--faint:#2a2a2a;--gym:#c8f135;--run:#3ab4ff;--rest:#555;--recovery:#a78bfa;--cheat:#fbbf24;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;min-height:100vh;}
+h1,h2,h3{font-family:'Bebas Neue',sans-serif;letter-spacing:.04em;}
+.shell{display:flex;height:100vh;overflow:hidden;}
+.sidebar{width:210px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 0;}
+.logo{padding:0 18px 18px;border-bottom:1px solid var(--border);margin-bottom:10px;}
+.logo h1{font-size:24px;color:var(--accent);line-height:1;}
+.logo p{font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:.08em;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 18px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border-left:2px solid transparent;}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,.03);}
+.nav-item.on{color:var(--accent);border-left-color:var(--accent);background:rgba(200,241,53,.05);}
+.nav-icon{font-size:15px;width:20px;text-align:center;}
+.nav-bottom{margin-top:auto;padding:14px 18px;border-top:1px solid var(--border);}
+.day-badge{background:rgba(200,241,53,.08);border:1px solid rgba(200,241,53,.25);border-radius:8px;padding:10px 12px;text-align:center;}
+.day-badge .dn{font-family:'Bebas Neue';font-size:32px;color:var(--accent);line-height:1;}
+.day-badge .dl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+.main{flex:1;overflow-y:auto;padding:28px;}
+.panel{display:none;}.panel.on{display:block;animation:fadeIn .25s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:14px;}
+.card-title{font-family:'Bebas Neue';font-size:15px;color:var(--muted);letter-spacing:.06em;margin-bottom:12px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px;}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.stat-val{font-family:'Bebas Neue';font-size:28px;line-height:1;color:var(--text);}
+.stat-val.g{color:var(--accent);}.stat-val.r{color:var(--accent2);}.stat-val.b{color:var(--accent3);}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+.badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:.04em;}
+.b-gym,.b-gym-a,.b-gym-b,.b-gym-c{background:rgba(200,241,53,.12);color:var(--gym);}
+.b-run{background:rgba(58,180,255,.12);color:var(--run);}
+.b-rest{background:rgba(85,85,85,.3);color:#888;}
+.b-recovery{background:rgba(167,139,250,.12);color:var(--recovery);}
+.b-cheat{background:rgba(251,191,36,.12);color:var(--cheat);}
+input,textarea,select{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 12px;width:100%;outline:none;transition:border .15s;}
+input:focus,textarea:focus,select:focus{border-color:var(--accent);}
+input[type=number]{-moz-appearance:textfield;}
+textarea{resize:vertical;min-height:80px;line-height:1.6;}
+select{cursor:pointer;}
+label{font-size:11px;color:var(--muted);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-family:'DM Sans';font-size:13px;font-weight:600;transition:all .15s;}
+.btn-primary{background:var(--accent);color:#000;}.btn-primary:hover{background:#d4f550;transform:translateY(-1px);}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);}.btn-ghost:hover{color:var(--text);}
+.btn-danger{background:rgba(255,92,58,.12);color:var(--accent2);border:1px solid rgba(255,92,58,.25);}
+.btn-info{background:rgba(58,180,255,.12);color:var(--accent3);border:1px solid rgba(58,180,255,.25);}
+.btn-sm{padding:5px 11px;font-size:12px;}
+.prog-bar{height:6px;background:var(--faint);border-radius:3px;overflow:hidden;margin-top:4px;}
+.prog-fill{height:100%;border-radius:3px;background:var(--accent);transition:width .4s;}
+.prog-fill.r{background:var(--accent2);}.prog-fill.y{background:var(--cheat);}
+.ai-out{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;font-size:13px;line-height:1.85;color:#ccc;white-space:pre-wrap;min-height:80px;}
+.ai-label{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.ai-label span{font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;font-weight:600;}
+.ai-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);}
+.ai-dot.live{background:var(--accent);animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.mindset-card{border-left:3px solid var(--accent);padding:12px 16px;background:rgba(200,241,53,.04);border-radius:0 8px 8px 0;font-size:13px;line-height:1.7;color:#ccc;}
+.mindset-card strong{color:var(--accent);font-family:'Bebas Neue';font-size:17px;letter-spacing:.04em;}
+.mood-row{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.mood-btn{font-size:20px;cursor:pointer;padding:6px 10px;border-radius:8px;border:2px solid transparent;transition:all .15s;background:var(--surface);}
+.mood-btn:hover{transform:scale(1.1);}
+.mood-btn.on{border-color:var(--accent);background:rgba(200,241,53,.1);}
+.slider-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.slider-label{font-size:12px;color:var(--muted);width:95px;flex-shrink:0;}
+input[type=range]{flex:1;accent-color:var(--accent);cursor:pointer;}
+.slider-val{font-family:'DM Mono';font-size:13px;color:var(--accent);width:35px;text-align:right;}
+.week-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
+.week-tab{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:'DM Sans';transition:all .15s;}
+.week-tab:hover{color:var(--text);}.week-tab.on{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.cal-head{font-size:10px;color:var(--muted);text-align:center;padding:3px;text-transform:uppercase;letter-spacing:.05em;}
+.cal-cell{aspect-ratio:1;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:11px;font-weight:600;border:1px solid transparent;transition:all .15s;position:relative;}
+.cal-cell:hover{border-color:var(--accent);}
+.cal-cell.sel{outline:2px solid var(--accent);outline-offset:2px;}
+.cal-dot{position:absolute;top:2px;right:2px;width:5px;height:5px;border-radius:50%;background:var(--cheat);}
+.cal-logged{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:var(--accent);}
+.hist-table{width:100%;border-collapse:collapse;font-size:12px;}
+.hist-table th{text-align:left;padding:8px 10px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);font-weight:500;}
+.hist-table td{padding:9px 10px;border-bottom:1px solid var(--faint);vertical-align:middle;}
+.hist-table tr:hover td{background:rgba(255,255,255,.02);}
+.comp-pill{display:inline-block;padding:2px 8px;border-radius:10px;font-family:'DM Mono';font-size:11px;font-weight:600;}
+.comp-hi{background:rgba(200,241,53,.15);color:var(--gym);}
+.comp-mid{background:rgba(251,191,36,.15);color:var(--cheat);}
+.comp-lo{background:rgba(255,92,58,.15);color:var(--accent2);}
+.comp-none{background:var(--faint);color:var(--muted);}
+.mini-bar{height:4px;border-radius:2px;background:var(--faint);overflow:hidden;width:60px;display:inline-block;vertical-align:middle;margin-left:4px;}
+.mini-fill{height:100%;border-radius:2px;}
+.info-box{background:rgba(58,180,255,.07);border:1px solid rgba(58,180,255,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--accent3);margin-bottom:12px;}
+.warn-box{background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--cheat);margin-bottom:12px;}
+.api-bar{display:flex;gap:8px;align-items:center;margin-bottom:12px;}
+.api-bar input{flex:1;font-family:'DM Mono';font-size:12px;}
+.api-tag{font-size:11px;padding:4px 10px;border-radius:6px;white-space:nowrap;}
+.api-tag.ok{background:rgba(200,241,53,.12);color:var(--accent);}
+.api-tag.no{background:rgba(255,92,58,.12);color:var(--accent2);}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--faint);border-radius:2px;}
+hr{border:none;border-top:1px solid var(--border);margin:14px 0;}
+.tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:5px;background:var(--faint);color:var(--muted);margin:2px;}
+.deficit-tag{background:rgba(255,92,58,.12);color:var(--accent2);}
+.surplus-tag{background:rgba(200,241,53,.12);color:var(--gym);}
+/* Day type selector */
+.dtype-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.dtype-btn{padding:8px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;font-family:'DM Sans';}
+.dtype-btn:hover{color:var(--text);}
+.dtype-btn.on-gym{border-color:var(--gym);background:rgba(200,241,53,.1);color:var(--gym);}
+.dtype-btn.on-run{border-color:var(--run);background:rgba(58,180,255,.1);color:var(--run);}
+.dtype-btn.on-rest{border-color:#777;background:rgba(100,100,100,.15);color:#aaa;}
+.dtype-btn.on-recovery{border-color:var(--recovery);background:rgba(167,139,250,.1);color:var(--recovery);}
+/* Meal item rows */
+.meal-block{border-bottom:1px solid var(--faint);padding:14px 0;}
+.meal-block:last-child{border-bottom:none;}
+.meal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.meal-name-lbl{font-weight:600;font-size:14px;}
+.meal-time-lbl{font-size:11px;color:var(--muted);font-family:'DM Mono';}
+.meal-items-grid{display:flex;flex-direction:column;gap:6px;}
+.meal-row-item{display:grid;grid-template-columns:20px 1fr 90px 70px;gap:8px;align-items:center;padding:4px 0;}
+.meal-row-item input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;}
+.item-name{font-size:12px;color:#ccc;}
+.item-name.done{color:var(--muted);text-decoration:line-through;}
+.portion-inp{padding:4px 7px;font-size:11px;font-family:'DM Mono';}
+.portion-unit{font-size:11px;color:var(--muted);padding:4px 7px;border:1px solid var(--border);border-radius:6px;background:var(--faint);}
+.custom-meal-form{background:var(--faint);border-radius:10px;padding:12px 14px;margin-top:10px;}
+.custom-meal-form h4{font-size:12px;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+.add-item-row{display:grid;grid-template-columns:1fr 80px 70px 32px;gap:6px;align-items:center;margin-bottom:6px;}
+/* Sentiment bar */
+.sent-bar{height:10px;border-radius:5px;background:linear-gradient(to right,var(--accent2),var(--cheat),var(--accent));position:relative;margin:8px 0;}
+.sent-needle{position:absolute;top:-5px;width:4px;height:20px;background:white;border-radius:2px;transform:translateX(-50%);transition:left .6s;box-shadow:0 0 6px rgba(255,255,255,.4);}
+/* History visual bars */
+.hbar-wrap{display:flex;flex-direction:column;gap:2px;}
+.hbar{height:5px;border-radius:2px;background:var(--accent);}
+</style>
+</head>
+<body>
+<div class="shell">
+<div class="sidebar">
+  <div class="logo"><h1>CORE OS</h1><p>Six-Pack Command Center</p></div>
+  <div class="nav-item on" onclick="nav('today',this)"><span class="nav-icon">⚡</span>Today</div>
+  <div class="nav-item" onclick="nav('log',this)"><span class="nav-icon">📋</span>Meal Log</div>
+  <div class="nav-item" onclick="nav('journal',this)"><span class="nav-icon">🧠</span>Journal</div>
+  <div class="nav-item" onclick="nav('stats',this)"><span class="nav-icon">📊</span>Body Stats</div>
+  <div class="nav-item" onclick="nav('history',this)"><span class="nav-icon">🗂️</span>History</div>
+  <div class="nav-item" onclick="nav('analysis',this)"><span class="nav-icon">🤖</span>AI Analysis</div>
+  <div class="nav-item" onclick="nav('mindset',this)"><span class="nav-icon">💬</span>Mindset</div>
+  <div class="nav-item" onclick="nav('settings',this)"><span class="nav-icon">⚙️</span>Settings</div>
+  <div class="nav-bottom">
+    <div class="day-badge"><div class="dn" id="sb-day">—</div><div class="dl">of 30 days</div></div>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- TODAY -->
+<div id="panel-today" class="panel on">
+  <h2 style="font-size:34px;margin-bottom:2px">TODAY'S MISSION</h2>
+  <p style="color:var(--muted);font-size:12px;margin-bottom:18px" id="today-sub"></p>
+  <div class="info-box" id="sleep-note" style="display:none">💡 <strong>Sleep quality tip:</strong> Fill yesterday's sleep rating in Journal → it gives better pattern analysis. You can log it this morning for last night.</div>
+  <div class="grid4" id="today-stats-row"></div>
+  <div class="grid2">
+    <div>
+      <div class="card">
+        <div class="card-title">Today's session</div>
+        <div id="today-wod-card"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Mindset injection</div>
+        <div class="mindset-card" id="today-mindset"></div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-title">Daily mandatories</div>
+        <div id="today-mands"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">30-day calendar</div>
+        <div class="cal-grid" id="cal-heads"></div>
+        <div class="cal-grid" id="mini-cal" style="margin-top:4px"></div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:var(--muted)">
+          <span>🟢 Gym</span><span>🔵 Run</span><span>⚪ Rest</span><span>🟣 Recovery</span><span>🟡 Cheat ok</span><span>• Logged</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MEAL LOG -->
+<div id="panel-log" class="panel">
+  <h2 style="font-size:34px;margin-bottom:2px">MEAL LOG</h2>
+  <p style="color:var(--muted);font-size:12px;margin-bottom:14px">Track every meal, portion size, and deviation. Honesty = better AI analysis.</p>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+      <div>
+        <div style="font-size:13px;margin-bottom:6px">Logging for: <strong id="log-day-lbl" style="color:var(--accent)"></strong></div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">What type of day was this?</div>
+        <div class="dtype-row" id="dtype-row"></div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="changeLogDay(-1)">← Prev day</button>
+        <button class="btn btn-ghost btn-sm" onclick="changeLogDay(1)">Next day →</button>
+        <button class="btn btn-primary btn-sm" onclick="saveMealLog()">💾 Save log</button>
+      </div>
+    </div>
+    <div id="meal-log-body"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Day compliance score</div>
+    <div id="log-compliance"></div>
+  </div>
+</div>
+
+<!-- JOURNAL -->
+<div id="panel-journal" class="panel">
+  <h2 style="font-size:34px;margin-bottom:2px">DAILY JOURNAL</h2>
+  <p style="color:var(--muted);font-size:12px;margin-bottom:14px">Log today or catch up on yesterday. AI analyses mood, energy, and patterns over time.</p>
+  <div class="info-box">💡 <strong>Sleep quality:</strong> Fill this the next morning — you'll know how you slept. All other fields can be filled same day or next morning.</div>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+    <span style="font-size:13px;color:var(--muted)">Logging for:</span>
+    <select id="journal-day-sel" onchange="loadJournalDay()" style="width:auto"></select>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">How did you feel?</div>
+      <div class="mood-row" id="mood-row">
+        <div class="mood-btn" onclick="setMood('💀','Destroyed',this)" title="Destroyed">💀</div>
+        <div class="mood-btn" onclick="setMood('😤','Struggling',this)" title="Struggling">😤</div>
+        <div class="mood-btn" onclick="setMood('😐','Neutral',this)" title="Neutral">😐</div>
+        <div class="mood-btn" onclick="setMood('💪','Motivated',this)" title="Motivated">💪</div>
+        <div class="mood-btn" onclick="setMood('🔥','On Fire',this)" title="On Fire">🔥</div>
+      </div>
+      <div class="slider-row"><span class="slider-label">Energy level</span><input type="range" min="1" max="10" value="7" id="sl-energy" oninput="document.getElementById('v-energy').textContent=this.value"><span class="slider-val" id="v-energy">7</span></div>
+      <div class="slider-row"><span class="slider-label">Sleep quality <span style="font-size:10px;color:var(--accent)">(fill next AM)</span></span><input type="range" min="1" max="10" value="7" id="sl-sleep" oninput="document.getElementById('v-sleep').textContent=this.value"><span class="slider-val" id="v-sleep">7</span></div>
+      <div class="slider-row"><span class="slider-label">Hunger level</span><input type="range" min="1" max="10" value="5" id="sl-hunger" oninput="document.getElementById('v-hunger').textContent=this.value"><span class="slider-val" id="v-hunger">5</span></div>
+      <div class="slider-row"><span class="slider-label">Cravings</span><input type="range" min="1" max="10" value="4" id="sl-cravings" oninput="document.getElementById('v-cravings').textContent=this.value"><span class="slider-val" id="v-cravings">4</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Workout status</div>
+      <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" id="wod-yes" onclick="setWod('yes')">✓ Crushed it</button>
+        <button class="btn btn-ghost btn-sm" id="wod-partial" onclick="setWod('partial')">◑ Partial</button>
+        <button class="btn btn-danger btn-sm" id="wod-no" onclick="setWod('no')">✗ Skipped</button>
+      </div>
+      <div id="wod-reason-wrap" style="display:none;margin-bottom:12px">
+        <label>What happened?</label>
+        <input type="text" id="wod-reason" placeholder="Travel / tired / injury / no time...">
+      </div>
+      <hr>
+      <div class="card-title" style="margin-top:10px">Cheat status</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" id="cheat-no" onclick="setCheat('none')">No cheat</button>
+        <button class="btn btn-ghost btn-sm" id="cheat-ok" onclick="setCheat('allowed')">Allowed meal</button>
+        <button class="btn btn-danger btn-sm" id="cheat-broke" onclick="setCheat('broke')">Broke rules</button>
+      </div>
+      <hr>
+      <div class="card-title" style="margin-top:10px">Water intake</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="number" id="water-inp" step="0.1" min="0" max="6" placeholder="2.5" style="width:80px">
+        <span style="font-size:13px;color:var(--muted)">litres</span>
+        <span style="font-size:11px;color:var(--accent)">Target: 3L</span>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Free write — dump everything</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Body, mind, cravings, wins, struggles, what you skipped, how you felt at the gym. AI reads this for patterns.</p>
+    <textarea id="journal-text" rows="6" placeholder="Today I felt... my workout was... I struggled with... I'm proud of... tomorrow I will..."></textarea>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+      <span style="font-size:11px;color:var(--muted)" id="jchar">0 chars</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost btn-sm" onclick="runSentiment()">🔍 Analyse sentiment</button>
+        <button class="btn btn-primary" onclick="saveJournal()">Save journal</button>
+      </div>
+    </div>
+  </div>
+  <div class="card" id="sent-card" style="display:none">
+    <div class="ai-label"><div class="ai-dot" id="sent-dot"></div><span>Sentiment analysis</span></div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Low energy / negative ←→ High energy / positive</div>
+    <div class="sent-bar"><div class="sent-needle" id="sent-needle" style="left:50%"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:12px"><span>0</span><span>50</span><span>100</span></div>
+    <div class="ai-out" id="sent-out">Analysing...</div>
+  </div>
+</div>
+
+<!-- BODY STATS -->
+<div id="panel-stats" class="panel">
+  <h2 style="font-size:34px;margin-bottom:2px">BODY STATS</h2>
+  <p style="color:var(--muted);font-size:12px;margin-bottom:14px">Log weekly or whenever you measure. Trends matter more than single readings.</p>
+  <div class="info-box">📸 <strong>Progress photo reminder:</strong> Take front, side, and back photos every Sunday morning in the same light, same pose. Store in a folder — the visual diff over 30 days is your biggest motivator.</div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Log stats</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div><label>Weight (kg)</label><input type="number" id="s-weight" step="0.1" placeholder="63.0"></div>
+        <div><label>Waist (cm)</label><input type="number" id="s-waist" step="0.5" placeholder="80.0"></div>
+        <div><label>Body fat %</label><input type="number" id="s-bf" step="0.1" placeholder="18.5"></div>
+        <div><label>Visceral fat</label><input type="number" id="s-vf" step="0.1" placeholder="6.5"></div>
+        <div><label>Skeletal muscle (kg)</label><input type="number" id="s-muscle" step="0.1" placeholder="33.3"></div>
+        <div><label>BMI</label><input type="number" id="s-bmi" step="0.1" placeholder="21.8"></div>
+        <div><label>Resting metabolism</label><input type="number" id="s-rm" step="1" placeholder="1477"></div>
+        <div><label>Sub-fat W/B %</label><input type="number" id="s-subwb" step="0.1" placeholder="2.8"></div>
+      </div>
+      <div><label>Notes / how do you look vs last week?</label><input type="text" id="s-notes" placeholder="Abs more visible, less bloat, waist tighter..."></div>
+      <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+        <button class="btn btn-primary" onclick="saveStats()">Save stats</button>
+        <span style="font-size:11px;color:var(--muted)" id="stats-msg"></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Progress vs Day 1 baseline</div>
+      <div id="stats-vs-base"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Stats history</div>
+    <div style="overflow-x:auto">
+    <table class="hist-table">
+      <thead><tr><th>Date</th><th>Weight</th><th>Waist</th><th>BF%</th><th>Visceral</th><th>Muscle</th><th>BMI</th><th>Notes</th></tr></thead>
+      <tbody id="stats-hist-body"></tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div id="panel-history" class="panel">
+  <h2 style="font-size:34px;margin-bottom:2px">HISTORY</h2>
+  <p style="color:var(--muted);font-size:12px;margin-bottom:14px">Every logged day with compliance visuals. Click a row to see the journal entry.</p>
+  <div class="week-tabs" id="hist-wtabs"></div>
+  <div class="card">
+    <div style="overflow-x:auto">
+    <table class="hist-table">
+      <thead>
+        <tr>
+          <th>Day</th><th>Type</th><th>Workout</th>
+          <th>Meal compliance</th><th>Mood</th>
+          <th>Energy</th><th>Sleep</th><th>Water</th>
+          <th>Cheat</th><th>Weight</th>
+        </tr>
+      </thead>
+      <tbody id="hist-body"></tbody>
+    </table>
+    </div>
+  </div>
+  <div class="card" id="hist-journal-card" style="display:none">
+    <div class="card-title" id="hist-journal-title">Journal entry</div>
+    <div id="hist-journal-text" style="font-size:13px;line-height:1.8;color:#ccc;white-space:pre-wrap"></div>
+  </div>
+</div>
+
+<!-- AI ANALYSIS -->
+<div id="panel-analysis" class="panel">
+  <h2 style="font-size:34px;margin-bottom:2px">AI ANALYSIS</h2>
+  <p style="color:var(--muted);font-size:12px;margin-bottom:14px">Claude analyses your logs and tells you what's working, what isn't, and what to fix.</p>
+  <div class="card">
+    <div class="card-title">Anthropic API key</div>
+    <div class="api-bar">
+      <input type="password" id="api-key-inp" placeholder="sk-ant-..." oninput="saveApiKey()">
+      <span class="api-tag no" id="api-tag">Not set</span>
+    </div>
+    <p style="font-size:11px;color:var(--muted)">Get free key at <strong>console.anthropic.com → API Keys</strong>. Stored locally in your browser only.</p>
+  </div>
+  <div class="week-tabs" id="analysis-scope-tabs">
+    <button class="week-tab on" onclick="setScope('week1',this)">Week 1</button>
+    <button class="week-tab" onclick="setScope('week2',this)">Week 2</button>
+    <button class="week-tab" onclick="setScope('week3',this)">Week 3</button>
+    <button class="week-tab" onclick="setScope('week4',this)">Week 4</button>
+    <button class="week-tab" onclick="setScope('all',this)">All 30 days</button>
+  </div>
+  <div class="card">
+    <div class="ai-label"><div class="ai-dot" id="ai-dot-main"></div><span id="ai-status">Ready</span></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <button class="btn btn-primary" onclick="runAI('summary')">▶ Performance summary</button>
+      <button class="btn btn-ghost btn-sm" onclick="runAI('deficit')">Find my gaps</button>
+      <button class="btn btn-ghost btn-sm" onclick="runAI('next')">Next week plan</button>
+    </div>
+    <div class="ai-out" id="ai-summary-out">Hit "Performance summary" to get a full analysis of your logs — what you're doing right, what's costing you progress, and exactly what to fix.</div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Diet pattern analysis</div>
+      <button class="btn btn-ghost btn-sm" onclick="runAI('diet')" style="margin-bottom:10px">Analyse my diet logs</button>
+      <div class="ai-out" id="ai-diet-out" style="min-height:60px;font-size:12px">Which meals you skip, what portions you over/under eat, what deviations cost you most.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Psychological patterns</div>
+      <button class="btn btn-ghost btn-sm" onclick="runAI('psych')" style="margin-bottom:10px">Analyse my journals</button>
+      <div class="ai-out" id="ai-psych-out" style="min-height:60px;font-size:12px">Mood triggers, skip patterns, cravings timing, mental blocks from your journal text.</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">What I must make up for</div>
+    <button class="btn btn-ghost btn-sm" onclick="runAI('makeup')" style="margin-bottom:10px">Show my deficits to compensate</button>
+    <div class="ai-out" id="ai-makeup-out" style="font-size:12px">Based on missed workouts, low-compliance days, and cheat meals — Claude calculates what you need to make up for and how.</div>
+  </div>
+</div>
+
+<!-- MINDSET -->
+<div id="panel-mindset" class="panel">
+  <h2 style="font-size:34px;margin-bottom:2px">MINDSET SYSTEM</h2>
+  <p style="color:var(--muted);font-size:12px;margin-bottom:14px">Psychological conditioning for six-pack discipline. Read this every day.</p>
+  <div class="grid2">
+    <div>
+      <div class="card"><div class="card-title">Today's conditioning</div><div class="mindset-card" id="mindset-today"></div></div>
+      <div class="card">
+        <div class="card-title">The identity shift</div>
+        <div class="mindset-card">
+          <strong>YOU ARE NOT TRYING TO GET ABS.</strong><br>
+          You are a person who has abs and is currently revealing them.<br><br>
+          The fat covering your six-pack is temporary. The muscle is already there — 33.3kg of it. Every disciplined meal, every set past failure, every time you choose water over jalebi: that's not willpower. That's just who you are now.
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card"><div class="card-title">The six laws</div><div id="six-laws"></div></div>
+      <div class="card"><div class="card-title">When you want to quit</div><div class="mindset-card" id="quit-script"></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">AI-personalised mindset protocol</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Claude reads your journal entries and writes conditioning specifically for YOUR mental blocks.</p>
+    <button class="btn btn-primary btn-sm" onclick="runAI('mindset')" style="margin-bottom:10px">Generate my protocol</button>
+    <div class="ai-out" id="ai-mindset-out" style="font-size:12px">Your personalised mindset protocol will appear here based on your journal patterns.</div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div id="panel-settings" class="panel">
+  <h2 style="font-size:34px;margin-bottom:2px">SETTINGS</h2>
+  <p style="color:var(--muted);font-size:12px;margin-bottom:14px">Configure your baseline and export your data.</p>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Your baseline</div>
+      <div style="margin-bottom:10px"><label>Your name</label><input type="text" id="cfg-name" placeholder="Your name" oninput="cfg('name',this.value)"></div>
+      <div style="margin-bottom:10px"><label>Plan start date (Day 1)</label><input type="date" id="cfg-start" oninput="cfg('start',this.value)"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><label>Baseline weight (kg)</label><input type="number" id="cfg-weight" step="0.1" oninput="cfg('weight',this.value)"></div>
+        <div><label>Baseline body fat %</label><input type="number" id="cfg-bf" step="0.1" oninput="cfg('bf',this.value)"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Export data</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button class="btn btn-ghost" onclick="exportJSON()">📥 Export all data (JSON)</button>
+        <button class="btn btn-ghost" onclick="exportCSV()">📊 Export for Google Sheets (CSV)</button>
+      </div>
+      <hr>
+      <div class="card-title" style="color:var(--accent2);margin-top:4px">Danger zone</div>
+      <button class="btn btn-danger btn-sm" onclick="clearAll()">Clear all data</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /shell -->
+<script>
+// ── PLAN DATA ──────────────────────────────────────────────────────
+var PLAN=[
+  {t:"gym-a"},{t:"run"},{t:"gym-b"},{t:"rest"},{t:"gym-c"},{t:"run"},{t:"rest",cheat:true},
+  {t:"gym-a"},{t:"run"},{t:"gym-b"},{t:"recovery"},{t:"gym-c"},{t:"run"},{t:"rest",cheat:true},
+  {t:"gym-a"},{t:"run"},{t:"gym-b"},{t:"rest"},{t:"gym-c"},{t:"run"},{t:"rest",cheat:true},
+  {t:"gym-a"},{t:"run"},{t:"gym-b"},{t:"recovery"},{t:"gym-c"},{t:"run"},{t:"rest",cheat:true},
+  {t:"gym-a"},{t:"gym-b"}
+];
+var TLABEL={"gym-a":"Gym A","gym-b":"Gym B","gym-c":"Gym C","run":"Run/HIIT","rest":"Rest","recovery":"Recovery"};
+var TCOLOR={"gym-a":"#1a3a0a","gym-b":"#152e08","gym-c":"#112508","run":"#0a2040","rest":"#1a1a1a","recovery":"#1e1040"};
+var TTEXT={"gym-a":"#c8f135","gym-b":"#9fd420","gym-c":"#7aba10","run":"#3ab4ff","rest":"#666","recovery":"#a78bfa"};
+
+var MINDSET_QUOTES=[
+  {s:"The body follows the mind.",t:"Every craving is a test. Every rep past failure is a vote for who you're becoming. You have 38 years of momentum — redirect it."},
+  {s:"Discomfort is data.",t:"If you're not uncomfortable during a set, you're not in the growth zone. Pain in the gym is productive. Pain from regret is not."},
+  {s:"You don't miss workouts.",t:"Missing workouts is for people who haven't decided yet. You've decided. The decision was made. Now you just execute."},
+  {s:"Protein is not optional.",t:"Every gram of protein you skip is muscle you're not building. Muscle is the engine of fat loss. Feed the engine."},
+  {s:"The mirror lies. The measurements don't.",t:"Progress at 18% → 10% body fat is not linear. Weeks will pass with no visible change. Then one morning the abs appear. Trust the data."},
+  {s:"Cheat meals are a tool, not a reward.",t:"You earn nothing by eating junk. The cheat meal is a metabolic reset — leptin refill, glycogen top-up. Use it like medicine, not celebration."},
+  {s:"Sleep is the anabolic window.",t:"At 38, testosterone and GH peak in deep sleep. 6 hours of sleep = leaving half your gains on the table. Non-negotiable."},
+  {s:"Tight hip flexors hide your lower abs.",t:"Anterior pelvic tilt physically pushes your belly forward. Every mobility session directly unmasks ab definition."},
+  {s:"Nasal breathing = fat burning.",t:"Mouth breathing signals the body to burn sugar. Nasal breathing signals fat oxidation. Slow down until you can breathe through your nose."},
+  {s:"The vacuum is your cheat code.",t:"5 × 20s stomach vacuums, every morning, empty stomach. Highest ROI ab exercise. Almost nobody does it. Do it."},
+];
+var SIX_LAWS=["Never skip the protein window. Shake within 20 min of finishing.","Stomach vacuums every morning. Non-negotiable. Empty stomach.","No chapati at dinner. Ever. Not even half.","3 litres of water. Track it. Not 2.8. 3.","In bed by 11:30pm. Sleep is the supplement you're not buying.","One cheat MEAL. Not one cheat day. Know the difference."];
+var QUIT_SCRIPTS=["You are not tired. You are weak. Tired is physical. Weak is a choice.","This feeling passes in 4 minutes. Your regret lasts all day.","The version of you with abs is doing the workout right now.","You have already done the hard part — changing and getting there. Just start.","One rep. Then another. You do not need to finish the workout. Just start it."];
+
+// ── DEFAULT MEALS ──────────────────────────────────────────────────
+var DEFAULT_MEALS={
+  "gym-a":[
+    {time:"6:30am",name:"Wake-up protocol",items:[{n:"300ml warm water + lemon + Himalayan salt",u:"ml",def:300},{n:"Stomach Vacuums × 5",u:"reps",def:5}]},
+    {time:"7:30am",name:"Morning nuts bowl",items:[{n:"Soaked almonds",u:"pcs",def:5},{n:"Soaked walnut",u:"pcs",def:1},{n:"Munakka (raisins)",u:"pcs",def:4},{n:"Pumpkin seeds",u:"tsp",def:1},{n:"Sunflower seeds",u:"tsp",def:1}]},
+    {time:"8:00am",name:"Pre-breakfast protein",items:[{n:"Nutrova protein scoop in water",u:"g",def:18},{n:"Soaked almonds (extra if not in nuts bowl)",u:"pcs",def:0}]},
+    {time:"9:00am",name:"Breakfast",items:[{n:"Dalia or Poha",u:"g",def:60},{n:"Boiled eggs",u:"pcs",def:2},{n:"Milk tea (no sugar)",u:"ml",def:150},{n:"Guava or apple (NOT banana/grapes)",u:"pcs",def:1}]},
+    {time:"12:30pm",name:"Mid-day fruits",items:[{n:"Watermelon",u:"g",def:200},{n:"Papaya",u:"g",def:150},{n:"Chia seeds soaked (optional)",u:"tsp",def:1}]},
+    {time:"2:00pm",name:"Lunch",items:[{n:"Large salad (beetroot, cucumber, carrot, onion)",u:"g",def:150},{n:"Olive oil + lemon dressing",u:"tsp",def:1},{n:"Dal",u:"bowls",def:2},{n:"Chapati",u:"pcs",def:1},{n:"Paneer OR boiled eggs",u:"g/pcs",def:100},{n:"Dahi",u:"bowl",def:1},{n:"Omega Maxepa pill",u:"pcs",def:1}]},
+    {time:"5:00pm",name:"Pre-workout snack",items:[{n:"Roasted chana (NOT namkeen)",u:"g",def:30},{n:"Makhanas",u:"pcs",def:10},{n:"Milk tea (no sugar)",u:"ml",def:150}]},
+    {time:"6:30pm",name:"Pre-gym fuel",items:[{n:"Banana (GYM DAYS ONLY)",u:"pcs",def:1},{n:"Water",u:"ml",def:300}]},
+    {time:"~9pm",name:"Post-workout",items:[{n:"Nutrova protein scoop (within 20 min)",u:"g",def:20},{n:"Water + pinch salt",u:"ml",def:300}]},
+    {time:"10:00pm",name:"Dinner",items:[{n:"Boiled eggs",u:"pcs",def:4},{n:"Lauki / tinda / turai sabzi",u:"g",def:150},{n:"Moong dal OR paneer",u:"g",def:100},{n:"Dahi (small)",u:"bowl",def:0.5},{n:"NO chapati",u:"—",def:0}]}
+  ],
+  "run":[
+    {time:"6:30am",name:"Wake-up protocol",items:[{n:"Warm water + lemon + salt",u:"ml",def:300},{n:"Stomach Vacuums × 5",u:"reps",def:5}]},
+    {time:"7:30am",name:"Morning nuts bowl",items:[{n:"Soaked almonds",u:"pcs",def:5},{n:"Soaked walnut",u:"pcs",def:1},{n:"Munakka",u:"pcs",def:4},{n:"Pumpkin seeds",u:"tsp",def:1},{n:"Sunflower seeds",u:"tsp",def:1}]},
+    {time:"9:00am",name:"Breakfast",items:[{n:"Protein scoop in milk",u:"g",def:18},{n:"Egg omelette (minimal oil)",u:"pcs",def:1},{n:"Milk tea (no sugar)",u:"ml",def:150},{n:"Apple",u:"pcs",def:1}]},
+    {time:"12:00pm",name:"Lunch",items:[{n:"Large salad",u:"g",def:150},{n:"Dal",u:"bowls",def:2},{n:"Chapati",u:"pcs",def:1},{n:"Dahi",u:"bowl",def:1},{n:"Omega Maxepa pill",u:"pcs",def:1}]},
+    {time:"2:00pm",name:"Fruits",items:[{n:"Watermelon or papaya",u:"g",def:200}]},
+    {time:"5:00pm",name:"Pre-run snack",items:[{n:"Roasted chana",u:"g",def:25},{n:"Makhanas",u:"pcs",def:10},{n:"Milk tea",u:"ml",def:150}]},
+    {time:"~8:30pm",name:"Post-run",items:[{n:"Protein scoop (within 20 min)",u:"g",def:20},{n:"Banana (recovery only)",u:"pcs",def:1}]},
+    {time:"10:00pm",name:"Dinner",items:[{n:"Boiled eggs",u:"pcs",def:4},{n:"Lauki sabzi",u:"g",def:150},{n:"Dahi",u:"bowl",def:0.5},{n:"NO chapati",u:"—",def:0}]}
+  ],
+  "rest":[
+    {time:"6:30am",name:"Wake-up protocol",items:[{n:"Warm water + lemon",u:"ml",def:300},{n:"Stomach Vacuums × 10",u:"reps",def:10},{n:"Green tea (no sugar)",u:"cup",def:1}]},
+    {time:"7:30am",name:"Morning nuts bowl",items:[{n:"Soaked almonds",u:"pcs",def:5},{n:"Soaked walnut",u:"pcs",def:1},{n:"Munakka",u:"pcs",def:4},{n:"Pumpkin seeds",u:"tsp",def:1},{n:"Sunflower seeds",u:"tsp",def:1}]},
+    {time:"9:00am",name:"Breakfast",items:[{n:"Boiled eggs",u:"pcs",def:2},{n:"Dalia (half portion)",u:"g",def:40},{n:"Milk tea (no sugar)",u:"ml",def:150},{n:"Guava",u:"pcs",def:1}]},
+    {time:"1:00pm",name:"Lunch",items:[{n:"Large salad",u:"g",def:150},{n:"Dal",u:"bowls",def:2},{n:"Dahi",u:"bowl",def:1},{n:"Omega Maxepa pill",u:"pcs",def:1},{n:"NO chapati (rest day)",u:"—",def:0}]},
+    {time:"4:00pm",name:"Snack",items:[{n:"Makhanas",u:"pcs",def:10},{n:"Almonds",u:"pcs",def:5},{n:"Green tea",u:"cup",def:1}]},
+    {time:"8:00pm",name:"Dinner",items:[{n:"Boiled eggs",u:"pcs",def:4},{n:"Green sabzi",u:"g",def:150},{n:"Moong dal",u:"bowl",def:1},{n:"Dahi (small)",u:"bowl",def:0.5},{n:"NO carbs",u:"—",def:0}]}
+  ]
+};
+DEFAULT_MEALS["gym-b"]=DEFAULT_MEALS["gym-a"];
+DEFAULT_MEALS["gym-c"]=DEFAULT_MEALS["gym-a"];
+DEFAULT_MEALS["recovery"]=DEFAULT_MEALS["rest"];
+
+var WORKOUTS={
+  "gym-a":{label:"Gym A — Heavy Pull + Core",dur:"90 min",phases:[
+    {n:"Warm-up (10 min)",items:["Progressive treadmill 8→13 km/h","World's Greatest Stretch 5/side","Cat-Cow 10 reps"]},
+    {n:"Phase 1 — Pull Power (4 rounds | 90s rest)",items:["Weighted Chin-Ups 6–8 ⚡ 2s pause at top, 4s descent","Romanian Deadlift 6 reps @ 80–85% ⚡ 4s descent + hold at bottom","Single-Arm DB Row 10/side ⚡ rotate torso open at top"]},
+    {n:"Phase 2 — Bicep + Back (3 rounds | 60s rest)",items:["Barbell Curls 10 reps ⚡ 5s iso hold on last rep","Chest-Supported DB Row 12 ⚡ 2s squeeze","Hammer Curls 10 reps"]},
+    {n:"Phase 3 — Core Destroy (3 rounds | 45s rest)",items:["Hanging Knee Raises 15 ⚡ posterior pelvic tilt + 1s pause","Cable Woodchoppers 15/side heavy","Weighted Plank 60s ⚡ exhale HARD every 10s","Hollow Hold 40s"]},
+    {n:"Finisher",items:["Dead Hang — max time","Stomach Vacuum 5 × 20s (MANDATORY)"]}
+  ]},
+  "gym-b":{label:"Gym B — Push + Abs Inferno",dur:"90 min",phases:[
+    {n:"Warm-up (10 min)",items:["Bike intervals 30s fast/60s easy × 5","Push-up walkouts 8 reps","Shoulder circles 20"]},
+    {n:"Phase 1 — Push Power (4 rounds | 90s rest)",items:["Bench Press 6–8 ⚡ 3s descent, 1s pause on chest","OHP DB Press 8–10 ⚡ brace abs hard every rep","Dips 12–15 ⚡ slight forward lean = chest dominant"]},
+    {n:"Phase 2 — Shoulder Density (3 rounds | 60s rest)",items:["Arnold Press 12 reps","DB Front Raise 12 ⚡ 2s hold at top","Lateral Raise 15 controlled"]},
+    {n:"Phase 3 — Abs Inferno (3 rounds | 45s rest)",items:["Cable Crunches 20 ⚡ 2s squeeze, chin to chest","Decline Sit-Ups 10kg × 15","Med Ball Slams 20 ⚡ VIOLENT ab-driven whip","Russian Twists 50 total weighted","Side Plank 45s/side + 5 hip dips"]},
+    {n:"Finisher",items:["8 rounds Sprint 30s / Walk 60s","Stomach Vacuum 5 × 20s"]}
+  ]},
+  "gym-c":{label:"Gym C — Full Body + Oblique Burn",dur:"90 min",phases:[
+    {n:"Warm-up (10 min)",items:["Jump rope 3 min","High knees 40s","Jumping jacks 50","Inchworm to plank 8 reps"]},
+    {n:"Phase 1 — Squat + Hinge (3 rounds | 90s rest)",items:["Goblet Squat 12 ⚡ 2s pause at bottom, max ab brace","Romanian Deadlift 8 reps","Farmer Walk 40m heavy"]},
+    {n:"Phase 2 — Full Body (3 rounds | 60s rest)",items:["Close-Grip Lat Pulldown 10 ⚡ crunch ribs down","Incline DB Press 10","DB Bent-Over Row 12","Isometric Curl Hold 30s at 90°"]},
+    {n:"Phase 3 — Oblique + Lower Abs (4 rounds | 45s rest)",items:["Cable Woodchoppers 15/side ⚡ initiate from hip","Hanging Leg Raises 12 ⚡ 2.5kg DB between feet","Windshield Wipers 12–16","Weighted Reverse Crunch 15","Side Plank Hip Dips 12/side"]},
+    {n:"Finisher",items:["Stomach Vacuum 5 × 20s","Dead Hang max time"]}
+  ]},
+  "run":{label:"Run / HIIT",dur:"45 min",phases:[
+    {n:"Option A — Progressive Treadmill",items:["0–5 min: 8 km/h nasal breathing","5–15 min: +0.5 km/h every minute","15–35 min: peak pace nasal breathing","35–40 min: 5–7% incline walk","40–45 min: 4-7-8 breathing"]},
+    {n:"Option B — Park HIIT",items:["Warm-up jog 5 min","10 rounds: Sprint 30s / Walk 60s","Last 2 rounds: hill sprint if available"]},
+    {n:"Core Finisher (mandatory)",items:["Plank 60s","Side Plank 40s/side","Bicycle Crunch 40","Dead Bug 12/side","Stomach Vacuum 5 × 20s"]}
+  ]},
+  "recovery":{label:"Active Recovery",dur:"30 min",phases:[
+    {n:"Movement",items:["15 min slow walk nasal breathing","World's Greatest Stretch 5/side","Leg Swings 20/side","Cat-Cow 15","Hip Flexor Stretch 60s/side","Cobra Stretch 60s"]},
+    {n:"Breath + Vacuum",items:["Stomach Vacuums 10 × 20s (double dose)","4-7-8 Breathing 5 rounds"]}
+  ]},
+  "rest":{label:"Rest Day",dur:"Full rest",phases:[{n:"Rest day protocol",items:["10 Stomach Vacuums morning empty stomach","Optional 20 min walk","3L water minimum","Sleep 8 hours"]}]}
+};
+
+// ── STATE & STORAGE ────────────────────────────────────────────────
+var ST={mood:null,wod:null,cheat:null,logDay:null,scope:'week1'};
+function LS(k){try{return JSON.parse(localStorage.getItem('cos_'+k)||'null');}catch(e){return null;}}
+function WS(k,v){localStorage.setItem('cos_'+k,JSON.stringify(v));}
+function getCfg(){return LS('cfg')||{name:'',start:'2026-04-30',weight:63,bf:18.5};}
+function getDayNum(){
+  var c=getCfg(),s=new Date(c.start);s.setHours(0,0,0,0);
+  var t=new Date();t.setHours(0,0,0,0);
+  return Math.min(Math.max(Math.floor((t-s)/864e5)+1,1),30);
+}
+function getApiKey(){return localStorage.getItem('cos_apikey')||'';}
+
+// ── NAV ────────────────────────────────────────────────────────────
+function nav(id,el){
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('on');});
+  document.getElementById('panel-'+id).classList.add('on');
+  el.classList.add('on');
+  var fn={today:renderToday,log:renderMealLog,journal:renderJournal,stats:renderStats,history:renderHistory,analysis:renderAnalysis,mindset:renderMindset,settings:renderSettings};
+  if(fn[id])fn[id]();
+}
+
+// ── TODAY ──────────────────────────────────────────────────────────
+function renderToday(){
+  var day=getDayNum(),p=PLAN[day-1],w=WORKOUTS[p.t];
+  document.getElementById('sb-day').textContent=day;
+  document.getElementById('today-sub').textContent=new Date().toDateString()+' · Day '+day+' of 30 · '+TLABEL[p.t];
+  document.getElementById('sleep-note').style.display='block';
+  var logs=LS('logs')||{},slog=LS('statslog')||[],cfg=getCfg();
+  var done=Object.keys(logs).filter(function(k){return logs[k].wod==='yes';}).length;
+  var last=slog.length?slog[slog.length-1]:null;
+  document.getElementById('today-stats-row').innerHTML=
+    mkStat('Day',day+'/30','g')+mkStat('Done',done+' workouts','g')+
+    mkStat('Weight',(last?last.weight:cfg.weight)+'kg','b')+mkStat('BF%',(last?last.bf:cfg.bf)+'%','');
+  var whtml='<div style="margin-bottom:8px"><span class="badge b-'+p.t.replace('-','')+'">'+w.label+'</span> <span style="font-size:11px;color:var(--muted)">'+w.dur+'</span></div>';
+  w.phases.forEach(function(ph){
+    whtml+='<div style="margin-bottom:8px"><div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:4px;text-transform:uppercase">'+ph.n+'</div>';
+    ph.items.forEach(function(it){
+      var pts=it.split(' ⚡ ');
+      whtml+='<div style="font-size:12px;color:#ccc;padding-left:8px;border-left:2px solid var(--faint);margin-bottom:2px">'+pts[0]+(pts[1]?'<span style="color:var(--accent);font-size:11px"> ⚡ '+pts[1]+'</span>':'')+'</div>';
+    });whtml+='</div>';
+  });
+  document.getElementById('today-wod-card').innerHTML=whtml;
+  var mi=MINDSET_QUOTES[(day-1)%MINDSET_QUOTES.length];
+  document.getElementById('today-mindset').innerHTML='<strong>'+mi.s+'</strong><br>'+mi.t;
+  var mands=['Warm water + lemon on wake-up','Morning nuts bowl (almonds, walnut, munakka, seeds)','Stomach Vacuums × 5 (empty stomach)','2.5–3L water today','Omega Maxepa post-lunch','Post-workout protein within 20 min','In bed by 11:30pm'];
+  var dl=logs['day'+day]||{},ms=dl.mands||[];
+  document.getElementById('today-mands').innerHTML=mands.map(function(m,i){
+    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--faint)"><input type="checkbox" id="m'+i+'" '+(ms[i]?'checked':'')+' onchange="saveMand('+i+',this.checked)" style="width:16px;height:16px;accent-color:var(--accent)"><label for="m'+i+'" style="text-transform:none;letter-spacing:0;font-size:12px;color:'+(ms[i]?'var(--muted)':'#ccc')+';'+(ms[i]?'text-decoration:line-through':'')+';cursor:pointer;margin:0">'+m+'</label></div>';
+  }).join('');
+  var heads=['M','T','W','T','F','S','S'];
+  document.getElementById('cal-heads').innerHTML=heads.map(function(h){return '<div class="cal-head">'+h+'</div>';}).join('');
+  var calHtml='';
+  for(var i=1;i<=30;i++){
+    var pl=PLAN[i-1],cl=TCOLOR[pl.t],tc=TTEXT[pl.t];
+    var logged=!!logs['day'+i],cur=i===day;
+    calHtml+='<div class="cal-cell '+(cur?'sel':'')+'" style="background:'+cl+';color:'+tc+'" title="Day '+i+': '+TLABEL[pl.t]+'">'+i+(pl.cheat?'<span class="cal-dot"></span>':'')+(logged?'<span class="cal-logged"></span>':'')+'</div>';
+  }
+  document.getElementById('mini-cal').innerHTML=calHtml;
+}
+function mkStat(l,v,c){return '<div class="stat"><div class="stat-label">'+l+'</div><div class="stat-val '+(c||'')+'">'+v+'</div></div>';}
+function saveMand(i,v){var logs=LS('logs')||{},d=getDayNum(),k='day'+d;if(!logs[k])logs[k]={};if(!logs[k].mands)logs[k].mands=[];logs[k].mands[i]=v;WS('logs',logs);}
+
+// ── MEAL LOG ──────────────────────────────────────────────────────
+function renderMealLog(){
+  if(ST.logDay===null)ST.logDay=getDayNum();
+  var day=ST.logDay;
+  document.getElementById('log-day-lbl').textContent='Day '+day;
+  var logs=LS('logs')||{},dl=logs['day'+day]||{};
+  var savedType=dl.dayType||PLAN[day-1].t;
+  var types=[{t:'gym-a',label:'🏋 Gym A'},{t:'gym-b',label:'🏋 Gym B'},{t:'gym-c',label:'🏋 Gym C'},{t:'run',label:'🏃 Run'},{t:'recovery',label:'🧘 Recovery'},{t:'rest',label:'💤 Rest'}];
+  var dtype=document.getElementById('dtype-row');
+  dtype.innerHTML=types.map(function(tp){
+    var base=tp.t.startsWith('gym')?'gym':tp.t;
+    var active=tp.t===savedType?'on-'+base:'';
+    return '<button class="dtype-btn '+active+'" onclick="setDayType(\''+tp.t+'\',this)">'+tp.label+'</button>';
+  }).join('');
+  renderMealItems(day,savedType,dl);
+  renderLogCompliance(day,savedType,dl);
+}
+
+function setDayType(t,el){
+  var day=ST.logDay,logs=LS('logs')||{};
+  if(!logs['day'+day])logs['day'+day]={};
+  logs['day'+day].dayType=t;
+  WS('logs',logs);
+  document.querySelectorAll('.dtype-btn').forEach(function(b){b.className='dtype-btn';});
+  var base=t.startsWith('gym')?'gym':t;
+  el.className='dtype-btn on-'+base;
+  var dl=logs['day'+day];
+  renderMealItems(day,t,dl);
+  renderLogCompliance(day,t,dl);
+}
+
+function renderMealItems(day,dayType,dl){
+  var meals=DEFAULT_MEALS[dayType]||DEFAULT_MEALS['rest'];
+  var mealLog=dl.meals||{};
+  var customMeals=dl.customMeals||[];
+  var html='';
+  meals.forEach(function(meal,mi){
+    var ml=mealLog[mi]||{};
+    html+='<div class="meal-block"><div class="meal-hdr"><span class="meal-name-lbl">'+meal.name+'</span><span class="meal-time-lbl">'+meal.time+'</span></div>';
+    html+='<div class="meal-items-grid">';
+    html+='<div style="display:grid;grid-template-columns:20px 1fr 90px 70px;gap:6px;align-items:center;padding:2px 0;margin-bottom:4px"><span></span><span style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Item</span><span style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Portion</span><span style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Unit</span></div>';
+    meal.items.forEach(function(item,ii){
+      var chk=(ml.items||[])[ii]!==false&&(ml.items||[])[ii]!==undefined?(ml.items||[])[ii]:false;
+      var portion=(ml.portions||[])[ii]!==undefined?(ml.portions||[])[ii]:item.def;
+      html+='<div class="meal-row-item">';
+      html+='<input type="checkbox" id="mi_'+mi+'_'+ii+'" '+(chk?'checked':'')+' onchange="toggleMealItem('+mi+','+ii+',this.checked)">';
+      html+='<label for="mi_'+mi+'_'+ii+'" class="item-name'+(chk?' done':'')+'">'+item.n+'</label>';
+      html+='<input type="number" class="portion-inp" value="'+portion+'" step="0.5" min="0" onchange="setPortionVal('+mi+','+ii+',this.value)">';
+      html+='<span class="portion-unit">'+item.u+'</span>';
+      html+='</div>';
+    });
+    html+='</div>';
+    html+='<div style="margin-top:8px"><input type="text" placeholder="Deviation note: what did you actually eat/skip?" value="'+(ml.deviation||'')+'" style="font-size:11px;padding:5px 8px" onchange="setDeviation('+mi+',this.value)"></div>';
+    html+='</div>';
+  });
+  // Custom meals section
+  html+='<div class="meal-block"><div class="meal-hdr"><span class="meal-name-lbl">➕ Custom meals / extras</span></div>';
+  html+='<div id="custom-meals-list">';
+  customMeals.forEach(function(cm,ci){
+    html+='<div style="display:grid;grid-template-columns:20px 1fr 90px 70px 28px;gap:6px;align-items:center;margin-bottom:6px">';
+    html+='<input type="checkbox" '+(cm.done?'checked':'')+' onchange="toggleCustom('+ci+',this.checked)">';
+    html+='<input type="text" value="'+cm.name+'" placeholder="What did you eat?" style="font-size:12px;padding:5px 8px" onchange="setCustomName('+ci+',this.value)">';
+    html+='<input type="number" value="'+cm.portion+'" step="0.5" style="font-size:11px;padding:5px 8px" onchange="setCustomPortion('+ci+',this.value)">';
+    html+='<input type="text" value="'+cm.unit+'" placeholder="unit" style="font-size:11px;padding:5px 8px" onchange="setCustomUnit('+ci+',this.value)">';
+    html+='<button onclick="removeCustom('+ci+')" style="background:var(--accent2);border:none;border-radius:5px;color:white;font-size:11px;cursor:pointer;padding:4px 6px">✕</button>';
+    html+='</div>';
+  });
+  html+='</div>';
+  html+='<button class="btn btn-info btn-sm" style="margin-top:8px" onclick="addCustomMeal()">+ Add custom meal / extra</button></div>';
+  document.getElementById('meal-log-body').innerHTML=html;
+}
+
+function toggleMealItem(mi,ii,v){
+  var logs=LS('logs')||{},k='day'+ST.logDay;
+  if(!logs[k])logs[k]={};if(!logs[k].meals)logs[k].meals={};if(!logs[k].meals[mi])logs[k].meals[mi]={items:[],portions:[]};
+  logs[k].meals[mi].items[ii]=v;WS('logs',logs);
+  renderLogCompliance(ST.logDay,logs[k].dayType||PLAN[ST.logDay-1].t,logs[k]);
+  var lbl=document.querySelector('#mi_'+mi+'_'+ii+' ~ .item-name')||document.querySelector('label[for="mi_'+mi+'_'+ii+'"]');
+  if(lbl){lbl.className='item-name'+(v?' done':'');}
+}
+function setPortionVal(mi,ii,v){
+  var logs=LS('logs')||{},k='day'+ST.logDay;
+  if(!logs[k])logs[k]={};if(!logs[k].meals)logs[k].meals={};if(!logs[k].meals[mi])logs[k].meals[mi]={items:[],portions:[]};
+  if(!logs[k].meals[mi].portions)logs[k].meals[mi].portions=[];
+  logs[k].meals[mi].portions[ii]=parseFloat(v);WS('logs',logs);
+}
+function setDeviation(mi,v){
+  var logs=LS('logs')||{},k='day'+ST.logDay;
+  if(!logs[k])logs[k]={};if(!logs[k].meals)logs[k].meals={};if(!logs[k].meals[mi])logs[k].meals[mi]={};
+  logs[k].meals[mi].deviation=v;WS('logs',logs);
+}
+function addCustomMeal(){
+  var logs=LS('logs')||{},k='day'+ST.logDay;
+  if(!logs[k])logs[k]={};if(!logs[k].customMeals)logs[k].customMeals=[];
+  logs[k].customMeals.push({name:'',portion:0,unit:'g',done:false});WS('logs',logs);
+  var dl=logs[k];renderMealItems(ST.logDay,dl.dayType||PLAN[ST.logDay-1].t,dl);
+}
+function toggleCustom(ci,v){mutCustom(ci,'done',v);}
+function setCustomName(ci,v){mutCustom(ci,'name',v);}
+function setCustomPortion(ci,v){mutCustom(ci,'portion',parseFloat(v));}
+function setCustomUnit(ci,v){mutCustom(ci,'unit',v);}
+function removeCustom(ci){
+  var logs=LS('logs')||{},k='day'+ST.logDay;
+  if(logs[k]&&logs[k].customMeals)logs[k].customMeals.splice(ci,1);WS('logs',logs);
+  var dl=logs[k];renderMealItems(ST.logDay,dl.dayType||PLAN[ST.logDay-1].t,dl);
+}
+function mutCustom(ci,field,val){
+  var logs=LS('logs')||{},k='day'+ST.logDay;
+  if(!logs[k]||!logs[k].customMeals)return;logs[k].customMeals[ci][field]=val;WS('logs',logs);
+}
+function changeLogDay(d){ST.logDay=Math.min(Math.max((ST.logDay||getDayNum())+d,1),30);renderMealLog();}
+function saveMealLog(){
+  var logs=LS('logs')||{},k='day'+ST.logDay;
+  if(!logs[k])logs[k]={};logs[k].savedAt=new Date().toISOString();WS('logs',logs);
+  alert('Day '+ST.logDay+' saved!');
+}
+function renderLogCompliance(day,dayType,dl){
+  var meals=DEFAULT_MEALS[dayType]||DEFAULT_MEALS['rest'],ml=dl.meals||{};
+  var tot=0,chk=0;
+  meals.forEach(function(meal,mi){var m=ml[mi]||{};meal.items.forEach(function(it,ii){if(it.def!==0){tot++;if((m.items||[])[ii])chk++;}});});
+  var custom=dl.customMeals||[],cdone=custom.filter(function(c){return c.done;}).length;
+  var pct=tot?Math.round(chk/tot*100):0;
+  var col=pct>=80?'':'r';
+  document.getElementById('log-compliance').innerHTML=
+    '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Plan compliance</span><span style="font-family:DM Mono;font-size:22px;color:var(--accent)">'+pct+'%</span></div>'+
+    '<div class="prog-bar"><div class="prog-fill '+col+'" style="width:'+pct+'%"></div></div>'+
+    '<div style="font-size:11px;color:var(--muted);margin-top:6px">'+chk+'/'+tot+' plan items · '+cdone+' custom items logged</div>'+
+    (pct<80?'<div style="font-size:12px;color:var(--accent2);margin-top:8px">⚠ Below 80% today. You need to make this up this week.</div>':'<div style="font-size:12px;color:var(--gym);margin-top:8px">✓ Good compliance. Stay consistent.</div>');
+}
+
+// ── JOURNAL ───────────────────────────────────────────────────────
+function renderJournal(){
+  var sel=document.getElementById('journal-day-sel');
+  sel.innerHTML='';
+  for(var i=1;i<=30;i++){sel.innerHTML+='<option value="'+i+'">Day '+i+' — '+TLABEL[PLAN[i-1].t]+'</option>';}
+  sel.value=getDayNum();
+  loadJournalDay();
+}
+function loadJournalDay(){
+  var day=parseInt(document.getElementById('journal-day-sel').value);
+  var logs=LS('logs')||{},dl=logs['day'+day]||{};
+  document.querySelectorAll('.mood-btn').forEach(function(b){b.classList.remove('on');});
+  if(dl.mood){document.querySelectorAll('.mood-btn').forEach(function(b){if(b.textContent.trim()===dl.mood.emoji)b.classList.add('on');});}
+  document.getElementById('sl-energy').value=dl.energy||7;document.getElementById('v-energy').textContent=dl.energy||7;
+  document.getElementById('sl-sleep').value=dl.sleep||7;document.getElementById('v-sleep').textContent=dl.sleep||7;
+  document.getElementById('sl-hunger').value=dl.hunger||5;document.getElementById('v-hunger').textContent=dl.hunger||5;
+  document.getElementById('sl-cravings').value=dl.cravings||4;document.getElementById('v-cravings').textContent=dl.cravings||4;
+  document.getElementById('journal-text').value=dl.journal||'';
+  document.getElementById('jchar').textContent=(dl.journal||'').length+' chars';
+  document.getElementById('water-inp').value=dl.water||'';
+  ['yes','partial','no'].forEach(function(s){document.getElementById('wod-'+s).style.background='';});
+  if(dl.wod)document.getElementById('wod-'+dl.wod).style.background='rgba(200,241,53,.15)';
+  document.getElementById('wod-reason-wrap').style.display=(dl.wod&&dl.wod!=='yes')?'block':'none';
+  document.getElementById('wod-reason').value=dl.wodReason||'';
+  ['no','ok','broke'].forEach(function(s){document.getElementById('cheat-'+s).style.background='';});
+  if(dl.cheat){var cm={'none':'no','allowed':'ok','broke':'broke'};var k=cm[dl.cheat]||'no';document.getElementById('cheat-'+k).style.background='rgba(200,241,53,.15)';}
+  document.getElementById('sent-card').style.display='none';
+  ST.mood=dl.mood||null;ST.wod=dl.wod||null;ST.cheat=dl.cheat||null;
+}
+document.getElementById('journal-text').addEventListener('input',function(){document.getElementById('jchar').textContent=this.value.length+' chars';});
+function setMood(emoji,label,el){
+  ST.mood={emoji:emoji,label:label};
+  document.querySelectorAll('.mood-btn').forEach(function(b){b.classList.remove('on');});
+  el.classList.add('on');
+}
+function setWod(s){
+  ST.wod=s;
+  ['yes','partial','no'].forEach(function(x){document.getElementById('wod-'+x).style.background='';});
+  document.getElementById('wod-'+s).style.background='rgba(200,241,53,.15)';
+  document.getElementById('wod-reason-wrap').style.display=(s!=='yes')?'block':'none';
+}
+function setCheat(s){
+  ST.cheat=s;
+  ['no','ok','broke'].forEach(function(x){document.getElementById('cheat-'+x).style.background='';});
+  var cm={none:'no',allowed:'ok',broke:'broke'};
+  document.getElementById('cheat-'+cm[s]).style.background='rgba(200,241,53,.15)';
+}
+function saveJournal(){
+  var day=parseInt(document.getElementById('journal-day-sel').value);
+  var logs=LS('logs')||{};if(!logs['day'+day])logs['day'+day]={};
+  var dl=logs['day'+day];
+  dl.journal=document.getElementById('journal-text').value;
+  dl.mood=ST.mood;dl.wod=ST.wod;dl.wodReason=document.getElementById('wod-reason').value;
+  dl.cheat=ST.cheat;dl.energy=parseInt(document.getElementById('sl-energy').value);
+  dl.sleep=parseInt(document.getElementById('sl-sleep').value);
+  dl.hunger=parseInt(document.getElementById('sl-hunger').value);
+  dl.cravings=parseInt(document.getElementById('sl-cravings').value);
+  dl.water=parseFloat(document.getElementById('water-inp').value)||0;
+  dl.date=new Date().toISOString();
+  WS('logs',logs);alert('Day '+day+' journal saved!');
+}
+function runSentiment(){
+  var key=getApiKey(),text=document.getElementById('journal-text').value.trim();
+  if(!text){alert('Write something first.');return;}
+  document.getElementById('sent-card').style.display='block';
+  document.getElementById('sent-out').textContent='Analysing...';
+  document.getElementById('sent-dot').className='ai-dot live';
+  if(!key){document.getElementById('sent-out').textContent='Add API key in AI Analysis tab to enable sentiment analysis.';document.getElementById('sent-dot').className='ai-dot';return;}
+  callClaude(
+    'You are a sports psychologist. Analyse this fitness journal entry. Return exactly:\nSCORE: [0-100 where 0=very negative/low energy, 50=neutral, 100=very positive/fired up]\nTHEMES: [2-3 key emotional themes in a phrase]\nRISK: [specific risk factor for skipping tomorrow, or "None detected"]\nINSIGHT: [one direct, tough coaching insight based on what they wrote]\nBe blunt and specific. No fluff.',
+    'Journal: '+text,
+    function(r){
+      document.getElementById('sent-out').textContent=r;document.getElementById('sent-dot').className='ai-dot';
+      var m=r.match(/SCORE:\s*(\d+)/);if(m)document.getElementById('sent-needle').style.left=m[1]+'%';
+    },
+    function(e){document.getElementById('sent-out').textContent='Error: '+e;}
+  );
+}
+
+// ── STATS ─────────────────────────────────────────────────────────
+function renderStats(){
+  var slog=LS('statslog')||[],cfg=getCfg();
+  var tbody=slog.slice().reverse().map(function(s){
+    return '<tr><td style="font-family:DM Mono;font-size:11px">'+s.date.split('T')[0]+'</td><td>'+s.weight+'kg</td><td>'+(s.waist||'—')+'cm</td><td>'+(s.bf||'—')+'%</td><td>'+(s.vf||'—')+'</td><td>'+(s.muscle||'—')+'kg</td><td>'+(s.bmi||'—')+'</td><td style="color:var(--muted);font-size:11px">'+(s.notes||'')+'</td></tr>';
+  }).join('');
+  document.getElementById('stats-hist-body').innerHTML=tbody||'<tr><td colspan="8" style="color:var(--muted);text-align:center;padding:20px">No stats logged yet</td></tr>';
+  var last=slog.length?slog[slog.length-1]:null;
+  var html='';
+  if(last){
+    var wd=(parseFloat(last.weight)-parseFloat(cfg.weight)).toFixed(1);
+    var bfd=last.bf?(parseFloat(last.bf)-parseFloat(cfg.bf)).toFixed(1):null;
+    html+=vsRow('Weight',cfg.weight+'kg',last.weight+'kg',wd,true);
+    if(bfd)html+=vsRow('Body fat',cfg.bf+'%',last.bf+'%',bfd,true);
+    if(last.waist)html+=vsRow('Waist','—',last.waist+'cm',null,false);
+    if(last.muscle)html+=vsRow('Muscle mass','—',last.muscle+'kg',null,false);
+  } else {
+    html='<div style="color:var(--muted);font-size:13px">Log your first entry to see progress vs baseline.</div>';
+  }
+  document.getElementById('stats-vs-base').innerHTML=html;
+}
+function vsRow(l,base,cur,diff,lowerBetter){
+  var col='var(--accent3)';
+  if(diff!==null){var pos=lowerBetter?parseFloat(diff)<0:parseFloat(diff)>0;col=pos?'var(--gym)':'var(--accent2)';}
+  return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--faint)"><span>'+l+'</span><span style="font-size:12px;color:var(--muted)">'+base+' → '+cur+'</span>'+(diff!==null?'<span style="font-family:DM Mono;color:'+col+'">'+(parseFloat(diff)>0?'+':'')+diff+'</span>':'')+'</div>';
+}
+function saveStats(){
+  var slog=LS('statslog')||[];
+  slog.push({date:new Date().toISOString(),weight:document.getElementById('s-weight').value,waist:document.getElementById('s-waist').value,bf:document.getElementById('s-bf').value,vf:document.getElementById('s-vf').value,muscle:document.getElementById('s-muscle').value,bmi:document.getElementById('s-bmi').value,rm:document.getElementById('s-rm').value,notes:document.getElementById('s-notes').value});
+  WS('statslog',slog);document.getElementById('stats-msg').textContent='Saved ✓';renderStats();
+}
+
+// ── HISTORY ───────────────────────────────────────────────────────
+function renderHistory(){
+  var wtabs=document.getElementById('hist-wtabs');
+  wtabs.innerHTML=['Week 1 (1–7)','Week 2 (8–14)','Week 3 (15–21)','Week 4 (22–30)'].map(function(w,i){
+    return '<button class="week-tab'+(i===0?' on':'')+'" onclick="histWeek('+(i+1)+',this)">'+w+'</button>';
+  }).join('');
+  renderHistWeek(1);
+}
+function histWeek(w,el){
+  if(el){document.querySelectorAll('#hist-wtabs .week-tab').forEach(function(b){b.classList.remove('on');});el.classList.add('on');}
+  renderHistWeek(w);
+}
+function renderHistWeek(w){
+  var logs=LS('logs')||{},s=(w-1)*7+1,e=Math.min(w===4?30:w*7,30);
+  var html='';
+  for(var i=s;i<=e;i++){
+    var p=PLAN[i-1],l=logs['day'+i]||{};
+    var dt=l.dayType||p.t;
+    var meals=DEFAULT_MEALS[dt]||DEFAULT_MEALS['rest'],ml=l.meals||{};
+    var tot=0,chk=0;
+    meals.forEach(function(meal,mi){var m=ml[mi]||{};meal.items.forEach(function(it,ii){if(it.def!==0){tot++;if((m.items||[])[ii])chk++;}});});
+    var pct=tot?Math.round(chk/tot*100):null;
+    var compHtml=pct!==null?('<span class="comp-pill '+(pct>=80?'comp-hi':pct>=60?'comp-mid':'comp-lo')+'">'+pct+'%</span><div class="mini-bar" style="vertical-align:middle;margin-left:4px"><div class="mini-fill" style="width:'+pct+'%;background:'+(pct>=80?'var(--gym)':pct>=60?'var(--cheat)':'var(--accent2)')+'"></div></div>'):'<span class="comp-pill comp-none">—</span>';
+    var wod=l.wod==='yes'?'<span style="color:var(--gym)">✓ Done</span>':l.wod==='partial'?'<span style="color:var(--cheat)">◑ Partial</span>':l.wod==='no'?'<span style="color:var(--accent2)">✗ Skipped</span>':'<span style="color:var(--faint)">—</span>';
+    var hasJournal=l.journal&&l.journal.length>0;
+    html+='<tr style="cursor:'+(hasJournal?'pointer':'default')+'" '+(hasJournal?'onclick="showHistJournal('+i+')"':'')+' title="'+(hasJournal?'Click to read journal':'No journal entry')+'">';
+    html+='<td style="font-weight:700">'+i+(hasJournal?'<span style="font-size:9px;color:var(--accent);margin-left:4px">📝</span>':'')+'</td>';
+    html+='<td><span class="badge b-'+dt.replace('-','')+'">'+TLABEL[dt]+'</span></td>';
+    html+='<td>'+wod+'</td>';
+    html+='<td>'+compHtml+'</td>';
+    html+='<td>'+(l.mood?l.mood.emoji+'<span style="font-size:11px;color:var(--muted);margin-left:4px">'+l.mood.label+'</span>':'—')+'</td>';
+    html+='<td>'+(l.energy?barVal(l.energy,10,'var(--accent3)'):'—')+'</td>';
+    html+='<td>'+(l.sleep?barVal(l.sleep,10,'var(--accent)'):'—')+'</td>';
+    html+='<td>'+(l.water?'<span style="color:'+(l.water>=3?'var(--gym)':l.water>=2?'var(--cheat)':'var(--accent2)')+'">'+l.water+'L</span>':'—')+'</td>';
+    html+='<td>'+(l.cheat?'<span style="color:'+(l.cheat==='none'?'var(--muted)':l.cheat==='allowed'?'var(--cheat)':'var(--accent2)')+'">'+l.cheat+'</span>':'—')+'</td>';
+    var slog=LS('statslog')||[];var sw=slog.find(function(s){return s.date&&s.date.split('T')[0]===((l.date||'').split('T')[0]);})||null;
+    html+='<td>'+(sw?sw.weight+'kg':'—')+'</td>';
+    html+='</tr>';
+  }
+  document.getElementById('hist-body').innerHTML=html||'<tr><td colspan="10" style="color:var(--muted);text-align:center;padding:20px">Nothing logged yet</td></tr>';
+  document.getElementById('hist-journal-card').style.display='none';
+}
+function barVal(v,max,col){
+  return '<span style="font-family:DM Mono;font-size:12px">'+v+'</span><div class="mini-bar" style="display:inline-block;vertical-align:middle;margin-left:4px"><div class="mini-fill" style="width:'+Math.round(v/max*100)+'%;background:'+col+'"></div></div>';
+}
+function showHistJournal(day){
+  var logs=LS('logs')||{},dl=logs['day'+day]||{};
+  var card=document.getElementById('hist-journal-card');
+  card.style.display='block';
+  document.getElementById('hist-journal-title').textContent='Day '+day+' journal — '+TLABEL[PLAN[day-1].t];
+  document.getElementById('hist-journal-text').textContent=dl.journal||'No entry.';
+  card.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// ── AI ANALYSIS ───────────────────────────────────────────────────
+function renderAnalysis(){loadApiKeyUI();}
+function loadApiKeyUI(){
+  var k=getApiKey();
+  document.getElementById('api-key-inp').value=k;
+  document.getElementById('api-tag').textContent=k?'Key set ✓':'Not set';
+  document.getElementById('api-tag').className='api-tag '+(k?'ok':'no');
+}
+function saveApiKey(){
+  var k=document.getElementById('api-key-inp').value.trim();
+  localStorage.setItem('cos_apikey',k);
+  document.getElementById('api-tag').textContent=k?'Key set ✓':'Not set';
+  document.getElementById('api-tag').className='api-tag '+(k?'ok':'no');
+}
+function setScope(s,el){ST.scope=s;document.querySelectorAll('#analysis-scope-tabs .week-tab').forEach(function(b){b.classList.remove('on');});el.classList.add('on');}
+function buildDataSummary(scope){
+  var logs=LS('logs')||{},slog=LS('statslog')||[];
+  var rng={week1:[1,7],week2:[8,14],week3:[15,21],week4:[22,30],all:[1,30]};
+  var r=rng[scope]||[1,30],out=[];
+  for(var i=r[0];i<=r[1];i++){
+    var l=logs['day'+i];if(!l)continue;
+    var dt=l.dayType||PLAN[i-1].t,meals=DEFAULT_MEALS[dt]||DEFAULT_MEALS['rest'],ml=l.meals||{};
+    var tot=0,chk=0,deviations=[];
+    meals.forEach(function(meal,mi){var m=ml[mi]||{};meal.items.forEach(function(it,ii){if(it.def!==0){tot++;if((m.items||[])[ii])chk++;}});if(m.deviation)deviations.push(meal.name+': '+m.deviation);});
+    var custom=l.customMeals||[];
+    out.push({day:i,type:dt,wod:l.wod,wodReason:l.wodReason,compliance:tot?Math.round(chk/tot*100):null,deviations:deviations,custom:custom.map(function(c){return c.name+' '+c.portion+c.unit;}),mood:l.mood?l.mood.label:'',energy:l.energy,sleep:l.sleep,hunger:l.hunger,cravings:l.cravings,water:l.water,cheat:l.cheat,journal:l.journal?l.journal.substring(0,300):''});
+  }
+  return JSON.stringify({logs:out,recentStats:slog.slice(-3)});
+}
+function runAI(type){
+  var key=getApiKey();
+  if(!key){alert('Add your Anthropic API key first.');return;}
+  var outId={summary:'ai-summary-out',diet:'ai-diet-out',psych:'ai-psych-out',makeup:'ai-makeup-out',mindset:'ai-mindset-out',next:'ai-summary-out',deficit:'ai-summary-out'};
+  var el=document.getElementById(outId[type]);
+  if(!el)return;
+  el.textContent='Analysing your data...';
+  document.getElementById('ai-dot-main').className='ai-dot live';
+  document.getElementById('ai-status').textContent='Analysing...';
+  var data=buildDataSummary(ST.scope),cfg=getCfg();
+  var sysBase='You are an elite fitness coach, sports nutritionist and sports psychologist. The athlete: 38yo male, '+cfg.weight+'kg starting weight, '+cfg.bf+'% starting body fat, targeting 10-11% body fat for visible six-pack abs. Morning nuts bowl: 5 soaked almonds, 1 walnut, 4 munakka, pumpkin seeds, sunflower seeds — this is a daily habit. Plan: 30-day protocol alternating gym/run/rest/recovery days. Be specific, direct, and actionable. No fluff.';
+  var prompts={
+    summary:sysBase+'\n\nAnalyse the athlete\'s performance data and give:\n1) WEEK RATING: X/10 with one-sentence reason\n2) TOP 3 WINS: what they did right\n3) TOP 3 GAPS: what cost them progress (be specific about missed meals, skipped workouts, low compliance days)\n4) WHAT TO MAKE UP FOR: specific deficits to compensate next week\n5) ONE PRIORITY: single most important focus for next week\nData: '+data,
+    diet:sysBase+'\n\nAnalyse ONLY the dietary patterns. Identify:\n1) Which meals are skipped most often\n2) Portion deviations from plan (what they log vs what\'s prescribed)\n3) Custom/extra foods they\'re eating — assess if these help or hurt\n4) Compliance pattern (better on gym days vs rest days?)\n5) Top 3 dietary fixes with specific food swaps\nData: '+data,
+    psych:sysBase+'\n\nAnalyse ONLY the psychological data (mood, energy, sleep, journal text). Identify:\n1) Energy/mood patterns — when is the athlete strongest/lowest?\n2) Sleep quality impact on workout compliance\n3) Cravings pattern — when do they peak?\n4) Mental blocks visible in journal text\n5) 3 personalised psychological strategies for next week\nData: '+data,
+    makeup:sysBase+'\n\nCalculate what the athlete needs to make up for. Be specific:\n1) Missed workouts: how many, what type, how to compensate (extra sets? extra cardio?)\n2) Low-compliance diet days: which nutrients likely under-consumed\n3) Cheat meal impact: estimated setback and how to offset\n4) Concrete make-up plan for next 7 days (specific additional sessions or dietary adjustments)\nData: '+data,
+    mindset:sysBase+'\n\nWrite a PERSONALISED mindset protocol based on their actual journal entries. Use their own language where possible. Include:\n1) Their specific trigger for skipping (based on journal patterns)\n2) Their specific motivation pattern (what fires them up)\n3) 5 personalised mental cues for the gym\n4) 3 personalised cues for food temptation moments\n5) A direct message to their specific version of resistance\nData: '+data,
+    next:sysBase+'\n\nBased on performance data, design next week\'s specific adjustments:\n1) Which workout sessions to intensify and by how much\n2) Which meals need fixing and exactly how\n3) One new habit to add\n4) One bad habit to eliminate\n5) Specific daily focus for each day of next week\nData: '+data,
+    deficit:sysBase+'\n\nIdentify all gaps and deficits in the logged period:\n1) Workout deficits: missed sessions, partial sessions, effort gaps\n2) Nutrition deficits: consistently skipped meals or food items\n3) Sleep/recovery deficits\n4) Water intake gaps\n5) Priority order for making up these deficits\nData: '+data
+  };
+  callClaude(prompts[type],'Please provide the analysis.',
+    function(r){el.textContent=r;document.getElementById('ai-dot-main').className='ai-dot';document.getElementById('ai-status').textContent='Done';},
+    function(e){el.textContent='Error: '+e;document.getElementById('ai-dot-main').className='ai-dot';document.getElementById('ai-status').textContent='Error';}
+  );
+}
+
+// ── MINDSET ───────────────────────────────────────────────────────
+function renderMindset(){
+  var day=getDayNum(),mi=MINDSET_QUOTES[(day-1)%MINDSET_QUOTES.length];
+  document.getElementById('mindset-today').innerHTML='<strong>'+mi.s+'</strong><br><br>'+mi.t;
+  document.getElementById('six-laws').innerHTML=SIX_LAWS.map(function(l,i){
+    return '<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--faint);font-size:12px;color:#ccc"><span style="color:var(--accent);font-family:Bebas Neue;font-size:18px;width:18px;flex-shrink:0">'+(i+1)+'</span>'+l+'</div>';
+  }).join('');
+  document.getElementById('quit-script').innerHTML='<strong>READ THIS WHEN YOU WANT TO QUIT:</strong><br><br>'+QUIT_SCRIPTS[day%QUIT_SCRIPTS.length];
+}
+
+// ── SETTINGS ─────────────────────────────────────────────────────
+function renderSettings(){
+  var c=getCfg();
+  document.getElementById('cfg-name').value=c.name||'';
+  document.getElementById('cfg-start').value=c.start||'2026-04-30';
+  document.getElementById('cfg-weight').value=c.weight||63;
+  document.getElementById('cfg-bf').value=c.bf||18.5;
+}
+function cfg(k,v){var c=getCfg();c[k]=v;WS('cfg',c);}
+function exportJSON(){
+  var d={logs:LS('logs'),stats:LS('statslog'),cfg:getCfg()};
+  dl('coreos_'+new Date().toISOString().split('T')[0]+'.json',JSON.stringify(d,null,2),'application/json');
+}
+function exportCSV(){
+  var logs=LS('logs')||{},rows=['Day,Type,Workout,Compliance%,Mood,Energy,Sleep,Hunger,Water,Cheat,Custom meals,Journal'];
+  for(var i=1;i<=30;i++){
+    var l=logs['day'+i];if(!l)continue;
+    var dt=l.dayType||PLAN[i-1].t,meals=DEFAULT_MEALS[dt]||DEFAULT_MEALS['rest'],ml=l.meals||{};
+    var tot=0,chk=0;
+    meals.forEach(function(meal,mi){var m=ml[mi]||{};meal.items.forEach(function(it,ii){if(it.def!==0){tot++;if((m.items||[])[ii])chk++;}});});
+    var custom=(l.customMeals||[]).map(function(c){return c.name;}).join('|');
+    rows.push([i,dt,l.wod||'',tot?Math.round(chk/tot*100):'',l.mood?l.mood.label:'',l.energy||'',l.sleep||'',l.hunger||'',l.water||'',l.cheat||'',custom,'"'+(l.journal||'').replace(/"/g,"'").replace(/\n/g,' ')+'"'].join(','));
+  }
+  dl('coreos_logs.csv',rows.join('\n'),'text/csv');
+}
+function dl(name,content,type){
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type:type}));a.download=name;a.click();
+}
+function clearAll(){if(confirm('Delete ALL data?')){['logs','statslog','cfg'].forEach(function(k){localStorage.removeItem('cos_'+k);});alert('Cleared.');}}
+
+// ── CLAUDE API ────────────────────────────────────────────────────
+function callClaude(sys,user,ok,err){
+  var key=getApiKey();
+  fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:[{role:'user',content:user}]})})
+  .then(function(r){return r.json();}).then(function(d){if(d.error)err(d.error.message);else ok(d.content[0].text);}).catch(function(e){err(e.message);});
+}
+
+// ── INIT ──────────────────────────────────────────────────────────
+document.getElementById('sb-day').textContent=getDayNum();
+renderToday();
+</script>
+</body>
+</html>
+<!-- PATCH: Google Sheets Sync + Protein Counter + Streak -->
+<script>
+// ── PROTEIN DATA (g per item) ────────────────────────────────
+var PROTEIN_PER_ITEM = {
+  "Nutrova protein scoop in water":18,"1 scoop Nutrova protein in water":18,
+  "Protein scoop in milk":18,"1 scoop protein (within 20 min)":20,
+  "Nutrova protein scoop (within 20 min)":20,
+  "Boiled eggs":6,"4 boiled eggs":24,"3-4 boiled eggs":21,"2 boiled eggs":12,
+  "1 egg omelette (minimal oil)":6,"Egg omelette (minimal oil)":6,
+  "Dal":9,"Moong dal OR paneer":15,"Moong dal":9,
+  "100g paneer OR boiled eggs":18,"100g paneer":18,
+  "Dahi":4,"Roasted chana (NOT namkeen)":8,
+  "Soaked almonds":1,"Soaked walnut":2,"Pumpkin seeds":2,
+  "Large salad (beetroot, cucumber, carrot, onion)":3
+};
+var PROTEIN_TARGET = 130;
+
+// ── WEB APP URL (set in settings) ───────────────────────────
+function getWebAppUrl() { return localStorage.getItem('cos_webappurl') || ''; }
+
+// ── CALCULATE PROTEIN FROM LOG ───────────────────────────────
+function calcProtein(day) {
+  var logs = LS('logs') || {}, dl = logs['day'+day] || {};
+  var dt = dl.dayType || PLAN[day-1].t;
+  var meals = DEFAULT_MEALS[dt] || DEFAULT_MEALS['rest'];
+  var ml = dl.meals || {};
+  var total = 0;
+  meals.forEach(function(meal, mi) {
+    var m = ml[mi] || {};
+    meal.items.forEach(function(item, ii) {
+      if ((m.items||[])[ii]) {
+        var portion = (m.portions||[])[ii] !== undefined ? (m.portions||[])[ii] : item.def;
+        var baseProtein = PROTEIN_PER_ITEM[item.n] || 0;
+        // Scale by portion vs default
+        if (item.def > 0 && portion > 0) {
+          total += baseProtein * (portion / item.def);
+        } else if (baseProtein > 0) {
+          total += baseProtein;
+        }
+      }
+    });
+  });
+  return Math.round(total);
+}
+
+// ── STREAK CALCULATOR ────────────────────────────────────────
+function calcStreak() {
+  var logs = LS('logs') || {};
+  var streak = 0;
+  var day = getDayNum();
+  for (var i = day; i >= 1; i--) {
+    var l = logs['day'+i];
+    if (!l) break;
+    var p = PLAN[i-1];
+    var isRest = p.t === 'rest' || p.t === 'recovery';
+    var dt = l.dayType || p.t;
+    var meals = DEFAULT_MEALS[dt] || DEFAULT_MEALS['rest'];
+    var ml = l.meals || {};
+    var tot = 0, chk = 0;
+    meals.forEach(function(meal,mi){var m=ml[mi]||{};meal.items.forEach(function(it,ii){if(it.def!==0){tot++;if((m.items||[])[ii])chk++;}});});
+    var comp = tot ? Math.round(chk/tot*100) : 0;
+    var wodOk = isRest || l.wod === 'yes' || l.wod === 'partial';
+    if (comp >= 75 && wodOk) streak++;
+    else break;
+  }
+  return streak;
+}
+
+// ── SYNC TO GOOGLE SHEETS ────────────────────────────────────
+function syncToSheets(day) {
+  var url = getWebAppUrl();
+  if (!url) return; // silently skip if not configured
+  var logs = LS('logs') || {}, dl = logs['day'+day] || {};
+  var dt = dl.dayType || PLAN[day-1].t;
+  var meals = DEFAULT_MEALS[dt] || DEFAULT_MEALS['rest'];
+  var ml = dl.meals || {};
+  var tot = 0, chk = 0, deviations = [];
+  meals.forEach(function(meal,mi){
+    var m=ml[mi]||{};
+    meal.items.forEach(function(it,ii){if(it.def!==0){tot++;if((m.items||[])[ii])chk++;}});
+    if(m.deviation) deviations.push(meal.name+': '+m.deviation);
+  });
+  var comp = tot ? Math.round(chk/tot*100) : 0;
+  var protein = calcProtein(day);
+  var slog = LS('statslog') || [];
+  var lastWeight = slog.length ? slog[slog.length-1].weight : '';
+  var payload = {
+    day: day,
+    date: new Date().toLocaleDateString('en-IN'),
+    dayType: dt,
+    wod: dl.wod || '',
+    wodReason: dl.wodReason || '',
+    compliance: comp,
+    proteinEst: protein,
+    water: dl.water || 0,
+    mood: dl.mood ? dl.mood.emoji + ' ' + dl.mood.label : '',
+    energy: dl.energy || '',
+    sleep: dl.sleep || '',
+    hunger: dl.hunger || '',
+    cravings: dl.cravings || '',
+    cheat: dl.cheat || '',
+    journal: dl.journal || '',
+    customMeals: (dl.customMeals||[]).map(function(c){return c.name+' '+c.portion+c.unit;}),
+    deviations: deviations,
+    weight: lastWeight
+  };
+  // Fire and forget — don't block UI
+  fetch(url, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({action: 'syncDay', payload: payload})
+  }).then(function(r){return r.json();})
+    .then(function(d){
+      if(d.ok) showSyncStatus('✓ Synced to Sheets', '#7dc832');
+      else showSyncStatus('Sync failed: '+d.message, '#ef4444');
+    }).catch(function(){showSyncStatus('Sync error — check Web App URL', '#ef4444');});
+}
+
+function syncStatsToSheets(statsPayload) {
+  var url = getWebAppUrl();
+  if (!url) return;
+  fetch(url, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({action: 'syncStats', payload: statsPayload})
+  }).catch(function(){});
+}
+
+function showSyncStatus(msg, color) {
+  var el = document.getElementById('sync-status');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = color;
+  el.style.display = 'block';
+  setTimeout(function(){el.style.display='none';}, 4000);
+}
+
+// ── PROTEIN BANNER (injected into Today panel) ───────────────
+function renderProteinBanner() {
+  var existing = document.getElementById('protein-banner');
+  if (!existing) return;
+  var day = getDayNum();
+  var protein = calcProtein(day);
+  var pct = Math.min(100, Math.round(protein/PROTEIN_TARGET*100));
+  var color = protein >= PROTEIN_TARGET ? '#7dc832' : protein >= PROTEIN_TARGET*0.7 ? '#fbbf24' : '#ef4444';
+  var msg = protein >= PROTEIN_TARGET
+    ? '✓ Protein target hit! ' + protein + 'g / ' + PROTEIN_TARGET + 'g'
+    : '⚡ ' + protein + 'g logged · Need ' + (PROTEIN_TARGET-protein) + 'g more today';
+  existing.innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
+    '<span style="font-size:13px;color:var(--text)">Daily protein</span>' +
+    '<span style="font-family:DM Mono;font-size:16px;color:'+color+'">'+protein+'g / '+PROTEIN_TARGET+'g</span></div>' +
+    '<div style="height:8px;background:var(--faint);border-radius:4px;overflow:hidden;margin-bottom:6px">' +
+    '<div style="height:100%;width:'+pct+'%;background:'+color+';border-radius:4px;transition:width .4s"></div></div>' +
+    '<div style="font-size:12px;color:'+color+'">'+msg+'</div>';
+}
+
+// ── STREAK BANNER ────────────────────────────────────────────
+function renderStreakBanner() {
+  var el = document.getElementById('streak-banner');
+  if (!el) return;
+  var streak = calcStreak();
+  if (streak === 0) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--muted)">No streak yet — log today\'s meals and workout to start one.</div>';
+    return;
+  }
+  var msg = streak >= 14 ? '🔥 UNSTOPPABLE' : streak >= 7 ? '💪 One full week' : streak >= 3 ? '⚡ Building momentum' : '🌱 Getting started';
+  el.innerHTML =
+    '<div style="display:flex;align-items:center;gap:12px">' +
+    '<div style="font-family:Bebas Neue;font-size:48px;color:var(--accent);line-height:1">'+streak+'</div>' +
+    '<div><div style="font-size:14px;font-weight:600;color:var(--text)">day streak</div>' +
+    '<div style="font-size:12px;color:var(--accent)">'+msg+'</div>' +
+    '<div style="font-size:11px;color:var(--muted);margin-top:2px">Miss today → resets to zero</div></div></div>';
+}
+
+// ── PATCH: inject protein + streak + sync into Today panel ───
+var _origRenderToday = renderToday;
+renderToday = function() {
+  _origRenderToday();
+  // Inject protein banner after stats row
+  var statsRow = document.getElementById('today-stats-row');
+  if (statsRow && !document.getElementById('protein-banner')) {
+    var pb = document.createElement('div');
+    pb.className = 'card';
+    pb.style.marginBottom = '14px';
+    pb.innerHTML = '<div class="card-title">Protein tracker</div><div id="protein-banner"></div>';
+    statsRow.parentNode.insertBefore(pb, statsRow.nextSibling);
+    // Inject streak banner
+    var sb = document.createElement('div');
+    sb.className = 'card';
+    sb.style.marginBottom = '14px';
+    sb.innerHTML = '<div class="card-title">Current streak</div><div id="streak-banner"></div>';
+    pb.parentNode.insertBefore(sb, pb.nextSibling);
+    // Sync status
+    var ss = document.createElement('div');
+    ss.id = 'sync-status';
+    ss.style.cssText = 'display:none;font-size:11px;padding:4px 10px;border-radius:6px;background:var(--faint);margin-bottom:8px';
+    sb.parentNode.insertBefore(ss, sb.nextSibling);
+  }
+  renderProteinBanner();
+  renderStreakBanner();
+};
+
+// ── PATCH: auto-sync on meal save ────────────────────────────
+var _origSaveMealLog = saveMealLog;
+saveMealLog = function() {
+  _origSaveMealLog();
+  var day = ST.logDay || getDayNum();
+  syncToSheets(day);
+  renderProteinBanner();
+};
+
+// ── PATCH: auto-sync on journal save ────────────────────────
+var _origSaveJournal = saveJournal;
+saveJournal = function() {
+  _origSaveJournal();
+  var day = parseInt(document.getElementById('journal-day-sel').value);
+  syncToSheets(day);
+};
+
+// ── PATCH: auto-sync on stats save ───────────────────────────
+var _origSaveStats = saveStats;
+saveStats = function() {
+  _origSaveStats();
+  var payload = {
+    weight: document.getElementById('s-weight').value,
+    waist: document.getElementById('s-waist').value,
+    bf: document.getElementById('s-bf').value,
+    vf: document.getElementById('s-vf').value,
+    muscle: document.getElementById('s-muscle').value,
+    bmi: document.getElementById('s-bmi').value,
+    rm: document.getElementById('s-rm').value,
+    notes: document.getElementById('s-notes').value
+  };
+  syncStatsToSheets(payload);
+};
+
+// ── PATCH: Web App URL in Settings ───────────────────────────
+var _origRenderSettings = renderSettings;
+renderSettings = function() {
+  _origRenderSettings();
+  var card = document.querySelector('#panel-settings .grid2');
+  if (card && !document.getElementById('webapp-url-field')) {
+    var div = document.createElement('div');
+    div.className = 'card';
+    div.style.gridColumn = 'span 2';
+    div.innerHTML = '<div class="card-title">Google Sheets sync</div>' +
+      '<div class="info-box" style="margin-bottom:10px">Paste your Apps Script Web App URL here. Every time you save meals, journal, or stats — data auto-syncs to your Google Sheet.</div>' +
+      '<label>Web App URL</label>' +
+      '<div style="display:flex;gap:8px;margin-bottom:8px">' +
+      '<input type="text" id="webapp-url-field" placeholder="https://script.google.com/macros/s/.../exec" style="flex:1;font-size:12px" value="'+(getWebAppUrl()||'')+'" onchange="saveWebAppUrl(this.value)">' +
+      '<button class="btn btn-ghost btn-sm" onclick="testWebApp()">Test connection</button></div>' +
+      '<span id="webapp-test-result" style="font-size:11px;color:var(--muted)"></span>' +
+      '<hr style="margin:14px 0">' +
+      '<div class="card-title" style="margin-top:0">How to get the URL</div>' +
+      '<div style="font-size:12px;color:var(--muted);line-height:1.8">1. Open script.google.com → paste the v3 Apps Script<br>' +
+      '2. Click <strong>Deploy</strong> → <strong>New Deployment</strong> → Type: <strong>Web App</strong><br>' +
+      '3. Execute as: <strong>Me</strong> · Who has access: <strong>Anyone</strong><br>' +
+      '4. Click Deploy → copy the URL → paste above<br>' +
+      '5. Set SHEET_ID in the script (create a blank Google Sheet → copy ID from URL)</div>';
+    card.appendChild(div);
+  }
+};
+
+function saveWebAppUrl(url) {
+  localStorage.setItem('cos_webappurl', url.trim());
+}
+
+function testWebApp() {
+  var url = getWebAppUrl();
+  var el = document.getElementById('webapp-test-result');
+  if (!url) { el.textContent = 'No URL set'; el.style.color = 'var(--accent2)'; return; }
+  el.textContent = 'Testing...'; el.style.color = 'var(--muted)';
+  fetch(url + '?action=ping')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if (d.ok) { el.textContent = '✓ Connected — Web App is live'; el.style.color = 'var(--gym)'; }
+      else { el.textContent = 'Connected but error: '+d.message; el.style.color = 'var(--cheat)'; }
+    }).catch(function(){el.textContent = '✗ Could not connect — check URL'; el.style.color = 'var(--accent2)';});
+}
+
+// Re-init
+renderToday();
+</script>
+<script>
+// ═══════════════════════════════════════════════════════════════
+// NUTRITION ENGINE PATCH v2
+// Replaces compliance % with actual macro estimates
+// Parses custom meals + deviation comments via Gemini
+// ═══════════════════════════════════════════════════════════════
+
+// ── MACRO DATABASE (per standard portion) ───────────────────
+var MACRO_DB = {
+  // Proteins
+  "boiled egg":          {p:6,  c:0.5, f:5,  cal:77,  unit:"egg"},
+  "egg":                 {p:6,  c:0.5, f:5,  cal:77,  unit:"egg"},
+  "nutrova protein":     {p:18, c:3,   f:1,  cal:93,  unit:"scoop"},
+  "protein scoop":       {p:20, c:3,   f:1,  cal:101, unit:"scoop"},
+  "protein shake":       {p:20, c:3,   f:1,  cal:101, unit:"scoop"},
+  "paneer":              {p:7,  c:1,   f:6,  cal:84,  unit:"100g"},
+  "dal":                 {p:9,  c:20,  f:0.5,cal:122, unit:"bowl"},
+  "moong dal":           {p:7,  c:14,  f:0.5,cal:90,  unit:"bowl"},
+  "dahi":                {p:4,  c:5,   f:3,  cal:61,  unit:"bowl"},
+  "chana":               {p:8,  c:20,  f:2,  cal:130, unit:"30g"},
+  "roasted chana":       {p:8,  c:20,  f:2,  cal:130, unit:"30g"},
+  // Carbs
+  "chapati":             {p:3,  c:18,  f:1,  cal:93,  unit:"piece"},
+  "roti":                {p:3,  c:18,  f:1,  cal:93,  unit:"piece"},
+  "dalia":               {p:5,  c:28,  f:0.5,cal:137, unit:"60g"},
+  "poha":                {p:3,  c:30,  f:1,  cal:141, unit:"60g"},
+  "banana":              {p:1,  c:27,  f:0,  cal:105, unit:"piece"},
+  "rice":                {p:4,  c:45,  f:0.5,cal:200, unit:"bowl"},
+  "paratha":             {p:4,  c:28,  f:8,  cal:200, unit:"piece"},
+  "bread":               {p:3,  c:15,  f:1,  cal:80,  unit:"slice"},
+  // Fruits
+  "watermelon":          {p:1,  c:12,  f:0,  cal:50,  unit:"200g"},
+  "papaya":              {p:1,  c:15,  f:0,  cal:60,  unit:"150g"},
+  "pomegranate":         {p:2,  c:18,  f:0,  cal:80,  unit:"bowl"},
+  "apple":               {p:0.5,c:25,  f:0,  cal:95,  unit:"piece"},
+  "guava":               {p:2,  c:14,  f:0.5,cal:68,  unit:"piece"},
+  "grapes":              {p:1,  c:27,  f:0,  cal:104, unit:"bowl"},
+  "mango":               {p:1,  c:28,  f:0,  cal:107, unit:"piece"},
+  // Nuts & seeds
+  "almond":              {p:1,  c:1,   f:1.4,cal:14,  unit:"piece"},
+  "walnut":              {p:2,  c:2,   f:9,  cal:98,  unit:"piece"},
+  "munakka":             {p:0.2,c:5,   f:0,  cal:20,  unit:"piece"},
+  "makhana":             {p:0.5,c:6,   f:0,  cal:25,  unit:"10pcs"},
+  "pumpkin seed":        {p:2,  c:1,   f:4,  cal:46,  unit:"tsp"},
+  "sunflower seed":      {p:1.5,c:1,   f:4,  cal:42,  unit:"tsp"},
+  "cashew":              {p:1.5,c:3,   f:4.5,cal:57,  unit:"piece"},
+  // Sabzi / veg
+  "lauki":               {p:0.5,c:3,   f:0,  cal:14,  unit:"bowl"},
+  "sabzi":               {p:2,  c:8,   f:2,  cal:58,  unit:"bowl"},
+  "salad":               {p:2,  c:8,   f:1,  cal:48,  unit:"bowl"},
+  // Beverages
+  "milk tea":            {p:2,  c:10,  f:2,  cal:66,  unit:"cup"},
+  "milk":                {p:4,  c:6,   f:2.5,cal:61,  unit:"100ml"},
+  "green tea":           {p:0,  c:0,   f:0,  cal:2,   unit:"cup"},
+  // Treats / cheat
+  "jalebi":              {p:1,  c:30,  f:8,  cal:195, unit:"piece"},
+  "samosa":              {p:3,  c:25,  f:12, cal:220, unit:"piece"},
+  "chocolate":           {p:1,  c:15,  f:8,  cal:135, unit:"20g"},
+  "biscuit":             {p:1,  c:10,  f:3,  cal:70,  unit:"piece"},
+  "rajma":               {p:9,  c:22,  f:0.5,cal:130, unit:"bowl"},
+  "chole":               {p:8,  c:20,  f:3,  cal:138, unit:"bowl"},
+};
+
+// ── PARSE TEXT → MACRO ESTIMATE ─────────────────────────────
+function estimateMacrosFromText(text) {
+  if (!text || text.trim().length < 3) return {p:0,c:0,f:0,cal:0};
+  var total = {p:0, c:0, f:0, cal:0};
+  var lower = text.toLowerCase();
+
+  Object.keys(MACRO_DB).forEach(function(key) {
+    if (lower.indexOf(key) !== -1) {
+      var macro = MACRO_DB[key];
+      // Try to find a number before or after the keyword
+      var regex = new RegExp('(\\d+(?:\\.\\d+)?)\\s*(?:x|×|pcs?|pieces?|bowls?|scoops?|slices?|g|ml)?\\s*(?:'+key+')', 'i');
+      var regex2 = new RegExp('(?:'+key+')\\s*(?:x|×)?\\s*(\\d+(?:\\.\\d+)?)', 'i');
+      var qty = 1;
+      var m = lower.match(regex) || lower.match(regex2);
+      if (m && m[1]) qty = parseFloat(m[1]);
+      // Cap qty to prevent wild estimates
+      if (qty > 20) qty = 1;
+      total.p   += macro.p   * qty;
+      total.c   += macro.c   * qty;
+      total.f   += macro.f   * qty;
+      total.cal += macro.cal * qty;
+    }
+  });
+  return {
+    p:   Math.round(total.p),
+    c:   Math.round(total.c),
+    f:   Math.round(total.f),
+    cal: Math.round(total.cal)
+  };
+}
+
+// ── ESTIMATE MACROS FROM CUSTOM MEAL ENTRY ──────────────────
+function estimateCustomMealMacros(name, portion, unit) {
+  var text = name + ' ' + portion + ' ' + (unit||'');
+  return estimateMacrosFromText(text);
+}
+
+// ── CALCULATE FULL DAY MACROS ────────────────────────────────
+function calcDayMacros(day) {
+  var logs = LS('logs') || {}, dl = logs['day'+day] || {};
+  var dt = dl.dayType || (PLAN[day-1] ? PLAN[day-1].t : 'rest');
+  var meals = DEFAULT_MEALS[dt] || DEFAULT_MEALS['rest'];
+  var ml = dl.meals || {};
+  var totals = {p:0, c:0, f:0, cal:0};
+
+  // 1. Plan items that are ticked
+  meals.forEach(function(meal, mi) {
+    var m = ml[mi] || {};
+    meal.items.forEach(function(item, ii) {
+      if ((m.items||[])[ii]) {
+        var portion = (m.portions||[])[ii] !== undefined ? parseFloat((m.portions||[])[ii]) : item.def;
+        var text = item.n + ' ' + portion + ' ' + item.u;
+        var macro = estimateMacrosFromText(text);
+        totals.p   += macro.p;
+        totals.c   += macro.c;
+        totals.f   += macro.f;
+        totals.cal += macro.cal;
+      }
+    });
+    // 2. Deviation/comment text for this meal
+    if (m.deviation && m.deviation.trim()) {
+      var devMacro = estimateMacrosFromText(m.deviation);
+      totals.p   += devMacro.p;
+      totals.c   += devMacro.c;
+      totals.f   += devMacro.f;
+      totals.cal += devMacro.cal;
+    }
+  });
+
+  // 3. Custom meals logged by user
+  (dl.customMeals || []).forEach(function(cm) {
+    if (cm.done || cm.name) {
+      var macro = estimateCustomMealMacros(cm.name, cm.portion, cm.unit);
+      totals.p   += macro.p;
+      totals.c   += macro.c;
+      totals.f   += macro.f;
+      totals.cal += macro.cal;
+    }
+  });
+
+  // 4. Journal free text — pick up any food mentions
+  if (dl.journal && dl.journal.trim()) {
+    var jMacro = estimateMacrosFromText(dl.journal);
+    // Only add if meaningful (avoid double counting)
+    if (jMacro.cal > 50) {
+      totals.p   += Math.round(jMacro.p   * 0.5); // 50% weight to avoid double count
+      totals.c   += Math.round(jMacro.c   * 0.5);
+      totals.f   += Math.round(jMacro.f   * 0.5);
+      totals.cal += Math.round(jMacro.cal * 0.5);
+    }
+  }
+
+  return {
+    p:   Math.round(totals.p),
+    c:   Math.round(totals.c),
+    f:   Math.round(totals.f),
+    cal: Math.round(totals.cal)
+  };
+}
+
+// ── MACRO DISPLAY CARD ───────────────────────────────────────
+function renderMacroBanner() {
+  var el = document.getElementById('macro-banner');
+  if (!el) return;
+  var day = getDayNum();
+  var m = calcDayMacros(day);
+
+  var pColor = m.p >= 130 ? '#7dc832' : m.p >= 100 ? '#fbbf24' : '#ef4444';
+  var calColor = m.cal <= 1900 ? '#7dc832' : m.cal <= 2100 ? '#fbbf24' : '#ef4444';
+
+  el.innerHTML =
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px">' +
+    macroCard('Protein', m.p+'g', '/ 130g', pColor) +
+    macroCard('Calories', m.cal+'', '/ ~1800', calColor) +
+    macroCard('Carbs', m.c+'g', 'est.', '#3ab4ff') +
+    macroCard('Fat', m.f+'g', 'est.', '#a78bfa') +
+    '</div>' +
+    '<div style="height:6px;background:var(--faint);border-radius:3px;overflow:hidden;margin-bottom:6px">' +
+    '<div style="height:100%;border-radius:3px;background:'+pColor+';width:'+Math.min(100,Math.round(m.p/130*100))+'%;transition:width .4s"></div>' +
+    '</div>' +
+    '<div style="font-size:11px;color:var(--muted)">Estimates from ticked items + deviation notes + custom meals + journal. ~15% variance is normal.</div>' +
+    (m.p < 100 ? '<div style="margin-top:8px;font-size:12px;color:#ef4444;background:rgba(255,92,58,.08);padding:8px;border-radius:6px">⚠ Protein '+(130-m.p)+'g short — add eggs, paneer, or dal before bed</div>' : '');
+}
+
+function macroCard(label, val, sub, color) {
+  return '<div style="background:var(--faint);border-radius:8px;padding:8px;text-align:center">' +
+    '<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px">'+label+'</div>' +
+    '<div style="font-size:18px;font-weight:700;color:'+color+'">'+val+'</div>' +
+    '<div style="font-size:10px;color:var(--muted)">'+sub+'</div>' +
+    '</div>';
+}
+
+// ── FIX DEFAULT MEALS (remove duplicates + wrong items) ──────
+// Patch the nuts bowl — remove duplicate almonds entry
+// Patch fruits — remove chia seeds
+// Patch pre-gym — remove banana (user adds via comment)
+document.addEventListener('DOMContentLoaded', function() {
+  // This runs after page load to patch DEFAULT_MEALS
+  if (typeof DEFAULT_MEALS !== 'undefined') {
+    // Fix morning nuts bowl — remove duplicate soaked almonds
+    Object.keys(DEFAULT_MEALS).forEach(function(dayType) {
+      DEFAULT_MEALS[dayType].forEach(function(meal) {
+        if (meal.name === 'Morning nuts bowl') {
+          // Deduplicate — keep unique items only
+          var seen = {};
+          meal.items = meal.items.filter(function(item) {
+            var key = item.n.toLowerCase().replace(/\s+/g,'');
+            if (seen[key]) return false;
+            seen[key] = true;
+            return true;
+          });
+        }
+        // Remove chia seeds from fruits
+        if (meal.name === 'Mid-day fruits' || meal.name === 'Fruits') {
+          meal.items = meal.items.filter(function(item) {
+            return item.n.toLowerCase().indexOf('chia') === -1;
+          });
+        }
+        // Remove banana from pre-gym fuel (user adds via comment)
+        if (meal.name === 'Pre-gym fuel') {
+          meal.items = meal.items.filter(function(item) {
+            return item.n.toLowerCase().indexOf('banana') === -1;
+          });
+          // Add a note field instead
+          if (!meal.noteHint) meal.noteHint = 'Add banana in deviation note if you had it';
+        }
+      });
+    });
+  }
+});
+
+// ── INJECT MACRO BANNER INTO TODAY + MEAL LOG ───────────────
+var _origRenderToday2 = renderToday;
+renderToday = function() {
+  _origRenderToday2();
+  // Replace protein banner with full macro banner
+  var pb = document.getElementById('protein-banner');
+  if (pb) {
+    var parent = pb.closest('.card');
+    if (parent) {
+      parent.querySelector('.card-title').textContent = 'Today\'s nutrition';
+      pb.id = 'macro-banner';
+      renderMacroBanner();
+    }
+  }
+};
+
+// ── PATCH MEAL LOG COMPLIANCE → MACRO DISPLAY ───────────────
+var _origRenderLogCompliance2 = renderLogCompliance;
+renderLogCompliance = function(day, dayType, dl) {
+  var m = calcDayMacros(day);
+  var pColor = m.p >= 130 ? 'var(--gym)' : m.p >= 100 ? 'var(--cheat)' : 'var(--accent2)';
+  var calColor = m.cal <= 1900 ? 'var(--gym)' : m.cal <= 2100 ? 'var(--cheat)' : 'var(--accent2)';
+  var el = document.getElementById('log-compliance');
+  if (!el) return;
+  el.innerHTML =
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">' +
+    macroCard('Protein', m.p+'g', '/ 130g', m.p>=130?'#7dc832':m.p>=100?'#fbbf24':'#ef4444') +
+    macroCard('Calories', m.cal+'', '/ ~1800', m.cal<=1900?'#7dc832':m.cal<=2100?'#fbbf24':'#ef4444') +
+    macroCard('Carbs', m.c+'g', 'est.', '#3ab4ff') +
+    macroCard('Fat', m.f+'g', 'est.', '#a78bfa') +
+    '</div>' +
+    '<div style="font-size:11px;color:var(--muted);margin-bottom:8px">Updates as you tick items, add portions, type deviation notes, and log custom meals.</div>' +
+    (m.p < 100 ? '<div style="font-size:12px;color:#ef4444;background:rgba(255,92,58,.08);padding:8px;border-radius:6px;margin-top:6px">⚠ Protein '+(130-m.p)+'g short. Add 2 eggs or 100g paneer tonight.</div>' :
+     m.p >= 130 ? '<div style="font-size:12px;color:#7dc832;background:rgba(200,241,53,.06);padding:8px;border-radius:6px;margin-top:6px">✓ Protein target hit.</div>' : '');
+};
+
+// ── PATCH TOGGLE MEAL ITEM → UPDATE MACROS LIVE ─────────────
+var _origToggleMealItem2 = toggleMealItem;
+toggleMealItem = function(mi, ii, v) {
+  _origToggleMealItem2(mi, ii, v);
+  setTimeout(function() {
+    renderLogCompliance(ST.logDay||getDayNum(), null, null);
+    renderMacroBanner();
+  }, 50);
+};
+
+// ── PATCH SAVE MEAL → INCLUDE MACRO ESTIMATE IN SYNC ────────
+var _origSaveMealLog2 = saveMealLog;
+saveMealLog = function() {
+  var day = ST.logDay || getDayNum();
+  var m = calcDayMacros(day);
+  // Store macros in log
+  var logs = LS('logs') || {};
+  if (!logs['day'+day]) logs['day'+day] = {};
+  logs['day'+day].macros = m;
+  WS('logs', logs);
+  _origSaveMealLog2();
+  // Update sync payload with macros
+  setTimeout(function() { renderMacroBanner(); }, 100);
+};
+
+// ── PATCH SYNC TO INCLUDE MACROS ────────────────────────────
+var _origSyncToSheets2 = syncToSheets;
+syncToSheets = function(day) {
+  var m = calcDayMacros(day);
+  var logs = LS('logs') || {}, dl = logs['day'+day] || {};
+  dl.macros = m;
+  // Add macros to the existing sync payload by overriding proteinEst
+  var origFetch = window.fetch;
+  window.fetch = function(url, opts) {
+    if (opts && opts.body) {
+      try {
+        var body = JSON.parse(opts.body);
+        if (body.payload) {
+          body.payload.proteinEst = m.p;
+          body.payload.carbsEst = m.c;
+          body.payload.fatEst = m.f;
+          body.payload.caloriesEst = m.cal;
+          opts.body = JSON.stringify(body);
+        }
+      } catch(e) {}
+    }
+    window.fetch = origFetch;
+    return origFetch.call(this, url, opts);
+  };
+  _origSyncToSheets2(day);
+};
+
+console.log('Nutrition engine v2 loaded');
+</script>
+<script>
+// ── PATCH: Remove water from meal log, restructure Today ─────
+
+// 1. Remove water from all meal defaults
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof DEFAULT_MEALS !== 'undefined') {
+    Object.keys(DEFAULT_MEALS).forEach(function(dt) {
+      DEFAULT_MEALS[dt].forEach(function(meal) {
+        // Remove water-only items from wake-up protocol
+        if (meal.name === 'Wake-up protocol') {
+          meal.items = meal.items.filter(function(item) {
+            return item.n.toLowerCase().indexOf('water') === -1 || 
+                   item.n.toLowerCase().indexOf('lemon') !== -1; // keep lemon water
+          });
+        }
+        // Remove standalone water items
+        meal.items = meal.items.filter(function(item) {
+          var n = item.n.toLowerCase();
+          return !(n === 'water' || n === '300ml water' || n === 'water + pinch salt');
+        });
+      });
+    });
+  }
+});
+
+// 2. Restructure Today panel — yesterday scorecard FIRST
+var _origRenderToday3 = renderToday;
+renderToday = function() {
+  _origRenderToday3();
+  
+  var day = getDayNum();
+  if (day < 2) return; // Day 1 has no yesterday
+  
+  var logs = LS('logs') || {};
+  var yd = logs['day'+(day-1)];
+  if (!yd) return;
+
+  // Build yesterday scorecard
+  var c = yd.macros ? yd.macros.p : (calcProtein ? calcProtein(day-1) : 0);
+  var comp = 0;
+  var p = PLAN[day-2];
+  var meals = DEFAULT_MEALS[p ? p.t : 'rest'] || DEFAULT_MEALS['rest'];
+  var ml = (yd.meals) || {};
+  var tot = 0, chk = 0;
+  meals.forEach(function(meal,mi){
+    var m=ml[mi]||{};
+    meal.items.forEach(function(it,ii){
+      if(it.def!==0){tot++;if((m.items||[])[ii])chk++;}
+    });
+  });
+  comp = tot ? Math.round(chk/tot*100) : 0;
+  var macros = yd.macros || {p:0,c:0,f:0,cal:0};
+  var protVal = macros.p || 0;
+  var wodIcon = yd.wod==='yes'?'✅ Done':yd.wod==='partial'?'🟡 Partial':yd.wod==='no'?'❌ Skipped':'— Not logged';
+  var wodCol = yd.wod==='yes'?'var(--gym)':yd.wod==='partial'?'var(--cheat)':'var(--accent2)';
+  var pCol = protVal>=130?'var(--gym)':protVal>=100?'var(--cheat)':'var(--accent2)';
+  var compCol = comp>=80?'var(--gym)':comp>=60?'var(--cheat)':'var(--accent2)';
+
+  // Insert at top of today panel
+  var panel = document.getElementById('panel-today');
+  if (!panel) return;
+  var existing = document.getElementById('yesterday-card');
+  if (existing) existing.remove();
+
+  var card = document.createElement('div');
+  card.id = 'yesterday-card';
+  card.className = 'card';
+  card.style.cssText = 'margin-bottom:14px;border-color:rgba(200,241,53,.2)';
+  card.innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
+    '<div class="card-title" style="margin-bottom:0">Yesterday — Day '+(day-1)+' scorecard</div>' +
+    '<span style="font-size:11px;color:var(--muted)">'+TLABEL[PLAN[day-2]?PLAN[day-2].t:'rest']+'</span>' +
+    '</div>' +
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px">' +
+    ycard('Workout', wodIcon, wodCol) +
+    ycard('Compliance', comp+'%', compCol) +
+    ycard('Protein', protVal+'g', pCol) +
+    ycard('Water', yd.water?yd.water+'L':'—', parseFloat(yd.water)>=3?'var(--gym)':'var(--cheat)') +
+    '</div>' +
+    (yd.mood ? '<div style="font-size:12px;color:var(--muted)">Mood: '+yd.mood.emoji+' '+yd.mood.label+' · Energy: '+(yd.energy||'—')+'/10 · Sleep: '+(yd.sleep||'fill AM')+'/10</div>' : '') +
+    buildFixList(yd, protVal, comp);
+
+  // Insert before first child
+  panel.insertBefore(card, panel.firstChild);
+};
+
+function ycard(label, val, color) {
+  return '<div style="background:var(--faint);border-radius:8px;padding:8px;text-align:center">' +
+    '<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">'+label+'</div>' +
+    '<div style="font-size:14px;font-weight:700;color:'+color+'">'+val+'</div>' +
+    '</div>';
+}
+
+function buildFixList(yd, prot, comp) {
+  var fixes = [];
+  if (yd.wod === 'no') fixes.push('Missed workout — add 15 min to today\'s session');
+  if (prot < 100) fixes.push('Protein '+(130-prot)+'g short — add 2 eggs to breakfast today');
+  if (parseFloat(yd.water) < 2.5) fixes.push('Low water — hit 3L today, set phone reminders');
+  if (comp < 70) fixes.push('Low meal compliance — identify what you skipped and fix today');
+  if (!fixes.length) return '<div style="font-size:12px;color:var(--gym);margin-top:8px">✓ Clean day yesterday. Stay consistent.</div>';
+  return '<div style="margin-top:8px;padding:8px;background:rgba(255,92,58,.06);border-radius:6px">' +
+    fixes.map(function(f){ return '<div style="font-size:12px;color:var(--accent2);padding:2px 0">→ '+f+'</div>'; }).join('') +
+    '</div>';
+}
+
+var TLABEL = {"gym-a":"Gym A","gym-b":"Gym B","gym-c":"Gym C","run":"Run/HIIT","rest":"Rest","recovery":"Recovery"};
+
+console.log('Today restructure patch loaded');
+</script>
+<style>
+/* ── MOBILE RESPONSIVE PATCH ─────────────────────────────── */
+@media (max-width: 768px) {
+  .shell { flex-direction: column; height: auto; overflow: visible; }
+
+  /* Sidebar becomes bottom nav on mobile */
+  .sidebar {
+    width: 100%; height: auto; flex-direction: row;
+    border-right: none; border-bottom: 1px solid var(--border);
+    padding: 0; overflow-x: auto; order: 2;
+    position: fixed; bottom: 0; left: 0; right: 0;
+    z-index: 100; background: var(--surface);
+  }
+  .logo { display: none; }
+  .nav-bottom { display: none; }
+  .nav-item {
+    flex-direction: column; padding: 8px 12px; font-size: 10px;
+    gap: 3px; border-left: none; border-top: 2px solid transparent;
+    min-width: 60px; text-align: center; white-space: nowrap;
+  }
+  .nav-item.on { border-left: none; border-top-color: var(--accent); }
+  .nav-icon { font-size: 18px; width: auto; }
+
+  /* Main content area */
+  .main {
+    padding: 16px 12px 80px; /* bottom padding for fixed nav */
+    order: 1;
+  }
+
+  /* Grids collapse to single column */
+  .grid2, .grid3, .grid4 { grid-template-columns: 1fr; }
+
+  /* Stats row goes 2-col on mobile */
+  #today-stats-row { grid-template-columns: 1fr 1fr !important; }
+
+  /* Cards */
+  .card { padding: 14px; }
+
+  /* History table scroll */
+  .hist-table { font-size: 11px; }
+  #history-content { overflow-x: auto; }
+
+  /* Meal log grid */
+  .meal-row-item {
+    grid-template-columns: 20px 1fr 70px 55px !important;
+    gap: 5px !important;
+  }
+
+  /* Week tabs wrap */
+  .week-tabs { gap: 4px; }
+  .week-tab { padding: 5px 10px; font-size: 11px; }
+
+  /* AI output */
+  .ai-out { font-size: 12px; }
+
+  /* Dtype buttons */
+  .dtype-row { gap: 5px; }
+  .dtype-btn { padding: 6px 10px; font-size: 12px; }
+
+  /* Buttons */
+  .btn { padding: 8px 12px; font-size: 12px; }
+  .btn-sm { padding: 5px 10px; font-size: 11px; }
+
+  /* Journal sliders */
+  .slider-label { width: 75px; font-size: 11px; }
+
+  /* Page title */
+  h2 { font-size: 26px !important; }
+
+  /* Calendar */
+  .cal-cell { font-size: 10px; border-radius: 5px; }
+  .cal-head { font-size: 9px; }
+
+  /* Mood row */
+  .mood-btn { font-size: 18px; padding: 5px 8px; }
+
+  /* Stats grid */
+  #panel-stats .grid2 { grid-template-columns: 1fr; }
+  #panel-settings .grid2 { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 380px) {
+  .nav-item { min-width: 50px; padding: 8px 6px; font-size: 9px; }
+  .main { padding: 12px 10px 75px; }
+}
+
+/* PWA / home screen feel */
+@media (display-mode: standalone) {
+  .sidebar { padding-bottom: env(safe-area-inset-bottom); }
+}
+</style>
+
+<script>
+// ── GEMINI API SUPPORT IN APP ─────────────────────────────────
+// Adds Gemini as alternative to Anthropic for in-app AI features
+
+function getGeminiKey() { return localStorage.getItem('cos_geminikey') || ''; }
+function getPreferredAI() { return localStorage.getItem('cos_ai_provider') || 'gemini'; }
+
+function callAI(systemPrompt, userMsg, onSuccess, onError) {
+  var provider = getPreferredAI();
+  if (provider === 'gemini') {
+    callGeminiInApp(systemPrompt + '\n\n' + userMsg, onSuccess, onError);
+  } else {
+    callClaude(systemPrompt, userMsg, onSuccess, onError);
+  }
+}
+
+function callGeminiInApp(prompt, onSuccess, onError) {
+  var key = getGeminiKey();
+  if (!key) {
+    onError('Add your Gemini API key in Settings → AI Provider');
+    return;
+  }
+  fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + key, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      contents: [{parts: [{text: prompt}]}],
+      generationConfig: {maxOutputTokens: 800, temperature: 0.7}
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.candidates && d.candidates[0])
+      onSuccess(d.candidates[0].content.parts[0].text);
+    else
+      onError('Gemini error: ' + JSON.stringify(d).substring(0, 100));
+  })
+  .catch(function(e) { onError(e.message); });
+}
+
+// Override runAI to use preferred provider
+var _origRunAI = runAI;
+runAI = function(type) {
+  var provider = getPreferredAI();
+  if (provider === 'gemini' && getGeminiKey()) {
+    runAIWithGemini(type);
+  } else {
+    _origRunAI(type);
+  }
+};
+
+function runAIWithGemini(type) {
+  var key = getGeminiKey();
+  if (!key) { alert('Add your Gemini API key in Settings.'); return; }
+  var outId = {summary:'ai-summary-out',diet:'ai-diet-out',psych:'ai-psych-out',
+               makeup:'ai-makeup-out',mindset:'ai-mindset-out',next:'ai-summary-out',deficit:'ai-summary-out'};
+  var el = document.getElementById(outId[type]);
+  if (!el) return;
+  el.textContent = 'Analysing with Gemini...';
+  document.getElementById('ai-dot-main').className = 'ai-dot live';
+  document.getElementById('ai-status').textContent = 'Analysing...';
+
+  var data = buildDataSummary(ST.scope), cfg = getCfg();
+  var sysBase = 'You are an elite fitness coach, sports nutritionist and sports psychologist. Athlete: 38yo male, '+cfg.weight+'kg, '+cfg.bf+'% body fat, targeting 10-11% for visible six-pack abs. Morning nuts bowl daily: 5 almonds, 1 walnut, 4 munakka, pumpkin + sunflower seeds. Protein target: 130g/day. Be direct, specific, tough but constructive. No fluff.';
+
+  var prompts = {
+    summary: sysBase+'\n\nAnalyse performance data:\n1) WEEK RATING: X/10 with reason\n2) TOP 3 WINS\n3) TOP 3 GAPS (specific — missed meals, skipped workouts, low compliance)\n4) WHAT TO MAKE UP FOR next week\n5) ONE PRIORITY for next week\nData: '+data,
+    diet: sysBase+'\n\nAnalyse dietary patterns ONLY:\n1) Most skipped meals\n2) Portion deviations from plan\n3) Custom/extra foods — help or hurt?\n4) Compliance pattern (gym vs rest days)\n5) Top 3 dietary fixes with specific swaps\nData: '+data,
+    psych: sysBase+'\n\nAnalyse psychological patterns ONLY from mood, energy, sleep, journals:\n1) When is athlete strongest/lowest?\n2) Sleep impact on compliance\n3) Craving patterns\n4) Mental blocks in journal text\n5) 3 personalised strategies for next week\nData: '+data,
+    makeup: sysBase+'\n\nCalculate deficits to make up:\n1) Missed workouts — how to compensate\n2) Low protein days — cumulative gap\n3) Cheat meal impact — how to offset\n4) Concrete make-up plan for next 7 days\nData: '+data,
+    mindset: sysBase+'\n\nWrite PERSONALISED mindset protocol from journal entries. Use their own language.\n1) Their specific skip trigger\n2) Their specific motivation pattern\n3) 5 personalised gym mental cues\n4) 3 personalised food temptation cues\n5) Direct message to their specific resistance\nData: '+data,
+    next: sysBase+'\n\nDesign next week adjustments:\n1) Which sessions to intensify and how much\n2) Which meals to fix and exactly how\n3) One new habit to add\n4) One bad habit to eliminate\n5) Daily focus for each day next week\nData: '+data,
+    deficit: sysBase+'\n\nIdentify all gaps:\n1) Workout deficits\n2) Consistent nutrition gaps\n3) Sleep/recovery deficits\n4) Priority order for making up deficits\nData: '+data
+  };
+
+  callGeminiInApp(prompts[type],
+    function(r) {
+      el.textContent = r;
+      document.getElementById('ai-dot-main').className = 'ai-dot';
+      document.getElementById('ai-status').textContent = 'Done';
+    },
+    function(e) {
+      el.textContent = 'Error: ' + e;
+      document.getElementById('ai-dot-main').className = 'ai-dot';
+      document.getElementById('ai-status').textContent = 'Error';
+    }
+  );
+}
+
+// Override runSentiment to use Gemini
+var _origRunSentiment = runSentiment;
+runSentiment = function() {
+  var provider = getPreferredAI();
+  if (provider === 'gemini' && getGeminiKey()) {
+    var text = document.getElementById('journal-text').value.trim();
+    if (!text) { alert('Write something first.'); return; }
+    document.getElementById('sent-card').style.display = 'block';
+    document.getElementById('sent-out').textContent = 'Analysing with Gemini...';
+    document.getElementById('sent-dot').className = 'ai-dot live';
+    callGeminiInApp(
+      'You are a sports psychologist. Analyse this fitness journal entry.\nReturn EXACTLY:\nSCORE: [0-100 where 0=very negative, 50=neutral, 100=very positive/fired up]\nTHEMES: [2-3 key emotional themes]\nRISK: [specific risk factor for skipping tomorrow, or "None detected"]\nINSIGHT: [one direct tough coaching insight]\n\nJournal: ' + text,
+      function(r) {
+        document.getElementById('sent-out').textContent = r;
+        document.getElementById('sent-dot').className = 'ai-dot';
+        var m = r.match(/SCORE:\s*(\d+)/);
+        if (m) document.getElementById('sent-needle').style.left = m[1] + '%';
+      },
+      function(e) { document.getElementById('sent-out').textContent = 'Error: ' + e; }
+    );
+  } else {
+    _origRunSentiment();
+  }
+};
+
+// ── ADD GEMINI KEY FIELD TO SETTINGS ─────────────────────────
+var _origRenderSettings2 = renderSettings;
+renderSettings = function() {
+  _origRenderSettings2();
+  if (document.getElementById('gemini-settings-block')) return;
+  var panel = document.getElementById('panel-settings');
+  if (!panel) return;
+  var div = document.createElement('div');
+  div.id = 'gemini-settings-block';
+  div.className = 'card';
+  div.innerHTML =
+    '<div class="card-title">AI provider</div>' +
+    '<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">' +
+    '<button class="btn btn-sm" id="ai-gemini-btn" onclick="setAIProvider(\'gemini\')" style="' + (getPreferredAI()==='gemini'?'background:var(--accent);color:#000':'') + '">Use Gemini (free)</button>' +
+    '<button class="btn btn-ghost btn-sm" id="ai-claude-btn" onclick="setAIProvider(\'claude\')" style="' + (getPreferredAI()==='claude'?'background:var(--accent);color:#000':'') + '">Use Claude</button>' +
+    '</div>' +
+    '<label>Gemini API key (free from aistudio.google.com)</label>' +
+    '<div style="display:flex;gap:8px;margin-bottom:8px">' +
+    '<input type="password" id="gemini-key-inp" placeholder="AIza..." value="'+(getGeminiKey()||'')+'" style="flex:1;font-family:DM Mono;font-size:12px" oninput="saveGeminiKey(this.value)">' +
+    '<button class="btn btn-ghost btn-sm" onclick="testGeminiKey()">Test</button>' +
+    '</div>' +
+    '<span id="gemini-test-result" style="font-size:11px;color:var(--muted)"></span>';
+  panel.appendChild(div);
+};
+
+function setAIProvider(p) {
+  localStorage.setItem('cos_ai_provider', p);
+  document.getElementById('ai-gemini-btn').style.background = p==='gemini'?'var(--accent)':'';
+  document.getElementById('ai-gemini-btn').style.color = p==='gemini'?'#000':'';
+  document.getElementById('ai-claude-btn').style.background = p==='claude'?'var(--accent)':'';
+  document.getElementById('ai-claude-btn').style.color = p==='claude'?'#000':'';
+}
+
+function saveGeminiKey(v) { localStorage.setItem('cos_geminikey', v.trim()); }
+
+function testGeminiKey() {
+  var el = document.getElementById('gemini-test-result');
+  el.textContent = 'Testing...'; el.style.color = 'var(--muted)';
+  callGeminiInApp('Reply with exactly: COREOS_OK',
+    function(r) { el.textContent = '✓ Gemini connected'; el.style.color = 'var(--gym)'; },
+    function(e) { el.textContent = '✗ Failed: ' + e; el.style.color = 'var(--accent2)'; }
+  );
+}
+
+// ── DATA SYNC FROM SHEETS ON LOAD ────────────────────────────
+// Fetches streak from Sheet web app on load to keep in sync
+function syncStreakFromSheet() {
+  var url = getWebAppUrl();
+  if (!url) return;
+  fetch(url + '?action=streak')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.ok && d.streak !== undefined) {
+        localStorage.setItem('cos_sheet_streak', d.streak);
+      }
+    }).catch(function() {});
+}
+
+// Run on load
+setTimeout(syncStreakFromSheet, 2000);
+console.log('Mobile + Gemini patch loaded');
+</script>
